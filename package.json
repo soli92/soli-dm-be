@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --loader tsx src/server.ts",
     "build": "tsc",
-    "heroku-postbuild": "npm run build",
+    "postbuild": "echo 'Build completed successfully'",
     "start": "node dist/server.js",
     "type-check": "tsc --noEmit"
   },
