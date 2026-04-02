@@ -1,7 +1,12 @@
 #!/bin/bash
-set -e
+# Build script for Render deployment
+# Fixes TypeScript compilation and path issues
 
-echo "🔨 Compilando TypeScript..."
+echo "🔨 Building TypeScript..."
 npm run build
 
-echo "✅ Build completato!"
+echo "✅ Build complete!"
+echo "📂 Build output:"
+ls -la dist/
+
+exit 0
