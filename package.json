@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Soli Dungeon Master - Backend API for D&D campaign management",
   "type": "module",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "node --loader tsx src/server.ts",
-    "build": "tsc",
+    "build": "tsc --outDir dist",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
