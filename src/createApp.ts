@@ -1,5 +1,6 @@
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
+import { buildCorsOptions } from "./lib/corsConfig";
 import { requireApiKeyWhenConfigured } from "./middleware/apiKey";
 import campaignsRouter from "./routes/campaigns";
 import charactersRouter from "./routes/characters";
@@ -15,15 +16,7 @@ import rulesRouter from "./routes/rules";
 export function createApp(): Express {
   const app: Express = express();
 
-  const corsOrigin = process.env.CORS_ORIGIN?.trim();
-
-  app.use(
-    cors(
-      corsOrigin
-        ? { origin: corsOrigin, credentials: true }
-        : { origin: true, credentials: true }
-    )
-  );
+  app.use(cors(buildCorsOptions()));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

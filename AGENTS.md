@@ -30,7 +30,8 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 | Variabile | Ruolo |
 |-----------|--------|
 | `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | Client server-side (mai esporre la service key al browser). |
-| `CORS_ORIGIN` | Se valorizzata, CORS solo quell’origine; altrimenti `origin: true`. |
+| `CORS_ORIGIN` | Una o più origini (virgola). Se valorizzata, solo quelle + opzionale preview Vercel; se vuota, `origin: true`. |
+| `CORS_ALLOW_VERCEL_PREVIEW` | `true` / `1` / `yes`: consente anche `https://*.vercel.app` il cui host contiene `CORS_VERCEL_PREVIEW_SUBSTRING` (default `soli-dm`) — utile per deploy preview ≠ `soli-dm-fe.vercel.app`. |
 | `SOLI_DM_API_KEY` | Se valorizzata, tutte le route `/api/*` richiedono la chiave; **`GET /health`** resta pubblico. |
 | `PORT` | Default `5000` in locale; su **Render** usa di solito la variabile `PORT` fornita dalla piattaforma (non forzare `5000` negli env se crea conflitti). |
 

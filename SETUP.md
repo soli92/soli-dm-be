@@ -239,12 +239,15 @@ Nel Render Dashboard:
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=(dalla Supabase)
 NODE_ENV=production
-CORS_ORIGIN=https://tuo-frontend.example.com
+CORS_ORIGIN=https://soli-dm-fe.vercel.app
+CORS_ALLOW_VERCEL_PREVIEW=true
 SOLI_DM_API_KEY=(opzionale, chiave condivisa per /api)
 ```
 
 **Note:**
 
+- **`CORS_ORIGIN`**: dominio **produzione** del FE (es. `https://soli-dm-fe.vercel.app`). Puoi elencare più URL separati da **virgola**.
+- **`CORS_ALLOW_VERCEL_PREVIEW=true`**: necessario se usi **deploy preview** Vercel (URL tipo `https://soli-dm-xxxxx-soli92s-projects.vercel.app`), diversi dal dominio di produzione.
 - **`PORT`**: Render in genere imposta da sola la variabile `PORT` ascoltata dal processo. Aggiungi `PORT=5000` solo se sai che non sovrascrive il binding richiesto dalla piattaforma; in dubbio, lascia che sia Render a gestirla.
 - Le variabili `JWT_SECRET`, `LOG_LEVEL`, `RATE_LIMIT_*` nel vecchio esempio non sono tutte usate dall’API attuale: configura solo ciò che è documentato in **`.env.example`** e in **`README.md`**.
 
@@ -329,8 +332,8 @@ npm run lint  # (se configurato)
 → Soluzione: Aspetta 1-2 minuti che si riavvii
 
 ### **Errore: "CORS error" dal frontend**
-→ `CORS_ORIGIN` non è configurato correttamente
-→ Soluzione: Verifica che sia l'URL completo di Vercel FE
+→ `CORS_ORIGIN` non coincide con l’origine del browser (es. preview Vercel ≠ produzione)
+→ Soluzione: imposta `CORS_ORIGIN` sull’URL di **produzione** e aggiungi **`CORS_ALLOW_VERCEL_PREVIEW=true`** per le preview `*.vercel.app` che contengono `soli-dm` nell’hostname (vedi `.env.example`).
 
 ### **Errore: "Invalid JWT"**
 → `JWT_SECRET` è diverso tra deploy locali e produttivi

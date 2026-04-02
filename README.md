@@ -74,7 +74,7 @@ Verifica che il server sia online. **Non richiede API key** anche se `SOLI_DM_AP
 
 ### Sicurezza opzionale
 
-- **`CORS_ORIGIN`**: se impostata, CORS accetta solo quell’origine; altrimenti in sviluppo viene accettata la richiesta in arrivo (`origin: true`).
+- **`CORS_ORIGIN`**: una o più origini (virgola). Se valorizzata, CORS le accetta; con **`CORS_ALLOW_VERCEL_PREVIEW=true`** anche le preview Vercel `https://*.vercel.app` il cui host contiene `soli-dm`. Se vuota: `origin: true` (sviluppo).
 - **`SOLI_DM_API_KEY`**: se impostata, tutte le route sotto `/api/*` richiedono header `x-soli-dm-api-key` o `Authorization: Bearer <chiave>`. Utile in produzione davanti a un frontend che condivide la chiave (meglio: BFF che aggiunge l’header lato server).
 
 ---
@@ -381,7 +381,7 @@ Il file [`render.yaml`](./render.yaml) in repo riflette questa configurazione (N
 ## 🔐 Sicurezza
 
 - **Supabase Row Level Security (RLS)**: Configura le policy nelle impostazioni Supabase
-- **CORS**: Configura `CORS_ORIGIN` nel `.env` per il tuo dominio frontend
+- **CORS**: `CORS_ORIGIN` (produzione) e opz. `CORS_ALLOW_VERCEL_PREVIEW` per deploy preview Vercel (vedi `.env.example`)
 - **Service role**: `SUPABASE_SERVICE_KEY` **solo** sul server (mai nel browser)
 - **API opzionale**: con `SOLI_DM_API_KEY` attiva, le richieste a `/api/*` richiedono header `x-soli-dm-api-key` o `Authorization: Bearer` (salvo `GET /health`)
 
