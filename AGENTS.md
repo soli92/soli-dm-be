@@ -4,7 +4,7 @@
 
 ## Progetto
 
-API **Express 4** + **TypeScript**, persistenza **Supabase** (client service role in `src/lib/supabase.ts`). Sorgente: `src/server.ts` (`dotenv` + `listen`). In produzione, dopo `npm run build`, l’entry eseguita è **`dist/server.js`** (CommonJS da `tsc`), avviata tramite **`npm start`** → **`scripts/start.cjs`**: risale le directory da `__dirname` fino a trovare `package.json` con `"name": "soli-dm-be"` e `dist/server.js` (così funziona anche se Render ha **Root Directory** su `src` ma la build ha scritto `dist/` nella root del repo). L’app HTTP è costruita da **`createApp()`** in `src/createApp.ts` (senza `listen`, usata da **Vitest** / **supertest**).
+API **Express 4** + **TypeScript**, persistenza **Supabase** (client service role in `src/lib/supabase.ts`). Sorgente: `src/server.ts` (`dotenv` + `listen`). In produzione, dopo `npm run build`, l’entry eseguita è **`dist/server.js`** (CommonJS da `tsc`), avviata tramite **`npm start`** → **`scripts/start.cjs`**: trova la directory con `package.json` (`"name": "soli-dm-be"`). Su **Render** (`RENDER` valorizzato), se `dist/server.js` manca, esegue **una volta** `npm run build` da quella root prima di fallire (mitiga build command / Root Directory errati; preferibile comunque root repo vuota e `npm ci && npm run build` in fase build). L’app HTTP è costruita da **`createApp()`** in `src/createApp.ts` (senza `listen`, usata da **Vitest** / **supertest**).
 
 ## Comandi
 

@@ -215,9 +215,14 @@ Se le tabelle non esistono, creale manualmente su Supabase:
 3. **Connect repository**: Seleziona `soli92/soli-dm-be`
 4. **Name**: `soli-dm-be`
 5. **Runtime**: Node (versione **20.x** consigliata; il [`render.yaml`](./render.yaml) in repo imposta `NODE_VERSION` se usi **Blueprint** da Git)
-6. **Root Directory**: **lascia vuoto** (deve essere la cartella che contiene `package.json`, **non** `src`). Se imposti `src`, `npm start` cercherà `dist/` nel posto sbagliato e vedrai errori tipo `Cannot find module '.../src/dist/server.js'`.
-7. **Build Command**: `npm install && npm run build` — obbligatorio: **`tsc`** genera `dist/` (cartella in `.gitignore`, non presente nel clone).
-8. **Start Command**: `npm start` — esegue [`scripts/start.cjs`](./scripts/start.cjs): risale le cartelle fino a trovare `dist/server.js` accanto al `package.json` di **soli-dm-be**, poi imposta il `cwd` per `dotenv` (utile se la Root Directory su Render è ancora `src` ma la build ha emesso `dist/` nella root del repo).
+6. **Root Directory**: **lascia vuoto** (root del repo: stessa cartella di `package.json` e `tsconfig.json`). **Non** usare solo `src`: la build non troverebbe `tsc` e non creerebbe `dist/` nella root.
+7. **Build Command**: `npm ci && npm run build` (o `npm install && npm run build`) — deve eseguire **`tsc`** così esiste `dist/server.js` nella root del repo.
+8. **Start Command**: `npm start` — [`scripts/start.cjs`](./scripts/start.cjs) trova la root del pacchetto `soli-dm-be`; su **Render**, se `dist/` manca ancora, tenta **una volta** `npm run build` prima di uscire (utile se la build in dashboard non ha prodotto `dist/`).
+
+**Se non puoi svuotare la Root Directory** e resta `src`, imposta:
+
+- **Build Command:** `cd .. && npm ci && npm run build`
+- **Start Command:** `cd .. && npm start`
 9. **Branch**: `main`
 10. Clicca **"Create Web Service"**
 

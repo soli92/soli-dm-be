@@ -1,14 +1,16 @@
+# Root Directory consigliata: vuota (root repo).
+# Se il servizio ha Root Directory = "src", usa in dashboard (o qui sotto al posto delle righe default):
+#   buildCommand: cd .. && npm ci && npm run build
+#   startCommand: cd .. && npm start
 services:
   - type: web
     name: soli-dm-be
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: "20.18.0"
-      - key: PORT
-        value: 5000
