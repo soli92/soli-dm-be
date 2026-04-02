@@ -183,6 +183,27 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/deities/filter/alignment/:alignment
+ * Filtra le divinità per allineamento (prima di /:name)
+ */
+router.get("/filter/alignment/:alignment", async (req: Request, res: Response) => {
+  try {
+    const { alignment } = req.params;
+    const filtered = dndDeities.filter(
+      (d) => d.alignment.toLowerCase() === alignment.toLowerCase()
+    );
+
+    res.json({
+      success: true,
+      data: filtered,
+      count: filtered.length,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/deities/:name
  * Ottieni dettagli di una divinità specifica
  */
@@ -198,27 +219,6 @@ router.get("/:name", async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, data: deityData });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * GET /api/deities/filter/alignment
- * Filtra le divinità per allineamento
- */
-router.get("/filter/alignment/:alignment", async (req: Request, res: Response) => {
-  try {
-    const { alignment } = req.params;
-    const filtered = dndDeities.filter(
-      (d) => d.alignment.toLowerCase() === alignment.toLowerCase()
-    );
-
-    res.json({
-      success: true,
-      data: filtered,
-      count: filtered.length,
-    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

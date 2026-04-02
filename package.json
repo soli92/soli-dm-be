@@ -8,7 +8,9 @@
     "build": "tsc",
     "postbuild": "echo 'Build completed successfully'",
     "start": "node dist/server.js",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "dnd",
@@ -34,7 +36,10 @@
     "express": "^4.18.2"
   },
   "devDependencies": {
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^3.0.5"
   }
 }

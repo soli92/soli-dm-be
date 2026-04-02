@@ -23,7 +23,7 @@ Questo repository contiene il **Backend API** costruito con **Node.js + Express 
 
 ### Prerequisiti
 
-- **Node.js 18+**
+- **Node.js 20+**
 - **npm** o **yarn**
 - **Supabase** account (gratuito su https://supabase.com)
 
@@ -70,7 +70,12 @@ Il server sarà disponibile su `http://localhost:5000`
 ```
 GET /health
 ```
-Verifica che il server sia online.
+Verifica che il server sia online. **Non richiede API key** anche se `SOLI_DM_API_KEY` è attiva.
+
+### Sicurezza opzionale
+
+- **`CORS_ORIGIN`**: se impostata, CORS accetta solo quell’origine; altrimenti in sviluppo viene accettata la richiesta in arrivo (`origin: true`).
+- **`SOLI_DM_API_KEY`**: se impostata, tutte le route sotto `/api/*` richiedono header `x-soli-dm-api-key` o `Authorization: Bearer <chiave>`. Utile in produzione davanti a un frontend che condivide la chiave (meglio: BFF che aggiunge l’header lato server).
 
 ---
 
@@ -301,11 +306,12 @@ created_at    TIMESTAMP
 # Development server (auto-reload)
 npm run dev
 
+# Test automatici (Vitest: unit + HTTP su createApp)
+npm test
+npm run test:watch
+
 # TypeScript type check
 npm run type-check
-
-# Lint (quando aggiunto)
-npm run lint
 
 # Build per production
 npm run build
@@ -318,7 +324,13 @@ npm start
 
 ```
 src/
-├── server.ts          # Express app setup
+├── server.ts          # Entry: dotenv + listen (usa createApp)
+├── createApp.ts       # Fabbrica Express (middleware + route, senza listen — usata anche dai test)
+├── lib/
+│   ├── supabase.ts    # Client Supabase (service role)
+│   └── diceRoll.ts    # Logica pura notazione NdX (testata)
+├── middleware/
+│   └── apiKey.ts      # API key opzionale su /api
 ├── routes/
 │   ├── campaigns.ts   # Campaign CRUD
 │   ├── characters.ts  # Character CRUD
@@ -327,9 +339,9 @@ src/
 │   ├── races.ts       # D&D races wiki
 │   ├── deities.ts     # D&D deities wiki
 │   └── rules.ts       # D&D core rules
-└── utils/
-    └── (future: validators, middlewares)
 ```
+
+File di test Vitest: `src/lib/diceRoll.test.ts`, `src/middleware/apiKey.test.ts`, `src/http.integration.test.ts`; setup env in `vitest.setup.ts`.
 
 ---
 

@@ -196,6 +196,23 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/rules/ability-scores/list
+ * Lista tutte le ability scores (prima di /:category)
+ */
+router.get("/ability-scores/list", async (req: Request, res: Response) => {
+  try {
+    const abilities = dndRules.ability_scores.abilities;
+    res.json({
+      success: true,
+      data: abilities,
+      count: abilities.length,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/rules/:category
  * Ottieni le regole di una categoria specifica
  */
@@ -209,23 +226,6 @@ router.get("/:category", async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, data: ruleData });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * GET /api/rules/ability-scores/list
- * Lista tutte le ability scores
- */
-router.get("/ability-scores/list", async (req: Request, res: Response) => {
-  try {
-    const abilities = dndRules.ability_scores.abilities;
-    res.json({
-      success: true,
-      data: abilities,
-      count: abilities.length,
-    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

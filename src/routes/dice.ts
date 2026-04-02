@@ -1,48 +1,8 @@
 import { Router, Request, Response } from "express";
-import { supabase } from "../server";
+import { supabase } from "../lib/supabase";
+import { rollDiceNotation } from "../lib/diceRoll";
 
 const router = Router();
-
-/**
- * Funzione per lanciare dadi
- * Formato: "4d6" = 4 dadi da 6 facce
- */
-function rollDice(notation: string): {
-  rolls: number[];
-  total: number;
-  notation: string;
-} {
-  const match = notation.match(/^(\d+)d(\d+)$/i);
-  if (!match) {
-    throw new Error(
-      "Invalid dice notation. Use format: NdX (e.g., 4d6, 2d20)"
-    );
-  }
-
-  const numDice = parseInt(match[1]);
-  const numSides = parseInt(match[2]);
-
-  if (numDice <= 0 || numSides <= 0) {
-    throw new Error("Number of dice and sides must be positive");
-  }
-
-  if (numDice > 100) {
-    throw new Error("Maximum 100 dice per roll");
-  }
-
-  if (numSides > 1000) {
-    throw new Error("Maximum 1000 sides per die");
-  }
-
-  const rolls: number[] = [];
-  for (let i = 0; i < numDice; i++) {
-    rolls.push(Math.floor(Math.random() * numSides) + 1);
-  }
-
-  const total = rolls.reduce((sum, roll) => sum + roll, 0);
-
-  return { rolls, total, notation };
-}
 
 /**
  * POST /api/dice/roll
@@ -59,7 +19,7 @@ router.post("/roll", async (req: Request, res: Response) => {
         .json({ error: "notation is required (e.g., 4d6, 2d20)" });
     }
 
-    const result = rollDice(notation);
+    const result = rollDiceNotation(notation);
 
     // Salva il roll nel database (opzionale)
     if (campaign_id) {
@@ -99,7 +59,9 @@ router.post("/roll-multiple", async (req: Request, res: Response) => {
         .json({ error: "rolls must be a non-empty array" });
     }
 
-    const results = notations.map((notation) => rollDice(notation));
+    const results = notations.map((notation: string) =>
+      rollDiceNotation(notation)
+    );
     const totalSum = results.reduce((sum, r) => sum + r.total, 0);
 
     res.json({

@@ -16,7 +16,7 @@ Questa guida spiega come configurare il **Backend API** per lo sviluppo locale e
 
 ## 1. Prerequisiti
 
-- **Node.js 18+** — [Scarica qui](https://nodejs.org/)
+- **Node.js 20+** — [Scarica qui](https://nodejs.org/)
 - **npm 9+** — Incluso in Node.js
 - **Supabase Account** — [Registrati qui](https://supabase.com/)
 - **Render Account** — [Registrati qui](https://render.com/) (per deploy)
@@ -36,7 +36,7 @@ cd soli-dm-be
 npm install
 
 # Verifica che Node.js sia corretto
-node --version  # Dovrebbe essere 18+
+node --version  # Dovrebbe essere 20+
 npm --version   # Dovrebbe essere 9+
 ```
 
@@ -85,6 +85,14 @@ Verifica che il server funzioni:
 curl http://localhost:5000/health
 # Risposta: {"status":"ok"}
 ```
+
+### Test automatici (opzionale, senza DB reale per i test base)
+
+```bash
+npm test
+```
+
+Vitest carica `vitest.setup.ts` con URL/chiave Supabase fittizi così i moduli si inizializzano; i test coprono dadi, API key e alcune route HTTP (wiki + dadi).
 
 ---
 
