@@ -217,7 +217,7 @@ Se le tabelle non esistono, creale manualmente su Supabase:
 5. **Runtime**: Node (versione **20.x** consigliata; il [`render.yaml`](./render.yaml) in repo imposta `NODE_VERSION` se usi **Blueprint** da Git)
 6. **Root Directory**: **lascia vuoto** (deve essere la cartella che contiene `package.json`, **non** `src`). Se imposti `src`, `npm start` cercherà `dist/` nel posto sbagliato e vedrai errori tipo `Cannot find module '.../src/dist/server.js'`.
 7. **Build Command**: `npm install && npm run build` — obbligatorio: **`tsc`** genera `dist/` (cartella in `.gitignore`, non presente nel clone).
-8. **Start Command**: `npm start` — esegue [`scripts/start.cjs`](./scripts/start.cjs), che punta a `dist/server.js` dalla root del pacchetto e imposta il `cwd` corretto per `dotenv`.
+8. **Start Command**: `npm start` — esegue [`scripts/start.cjs`](./scripts/start.cjs): risale le cartelle fino a trovare `dist/server.js` accanto al `package.json` di **soli-dm-be**, poi imposta il `cwd` per `dotenv` (utile se la Root Directory su Render è ancora `src` ma la build ha emesso `dist/` nella root del repo).
 9. **Branch**: `main`
 10. Clicca **"Create Web Service"**
 
