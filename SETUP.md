@@ -1,6 +1,6 @@
 # 🎲 Soli-DM Backend — Guida Setup Completa
 
-Questa guida spiega come configurare il **Backend API** per lo sviluppo locale e il deploy su **Render**.
+Questa guida spiega come configurare il **Backend API** per lo sviluppo locale e il deploy su **Render**. Per checklist comandi, test e regole per modifiche al codice vedi anche **`AGENTS.md`** nella root del repository.
 
 ---
 
@@ -214,11 +214,14 @@ Se le tabelle non esistono, creale manualmente su Supabase:
 2. Clicca **"New +"** → **"Web Service"**
 3. **Connect repository**: Seleziona `soli92/soli-dm-be`
 4. **Name**: `soli-dm-be`
-5. **Runtime**: Node
-6. **Build Command**: `npm install`
-7. **Start Command**: `npm run build && npm start`
-8. **Branch**: `main`
-9. Clicca **"Create Web Service"**
+5. **Runtime**: Node (versione **20.x** consigliata; il [`render.yaml`](./render.yaml) in repo imposta `NODE_VERSION` se usi **Blueprint** da Git)
+6. **Root Directory**: **lascia vuoto** (deve essere la cartella che contiene `package.json`, **non** `src`). Se imposti `src`, `npm start` cercherà `dist/` nel posto sbagliato e vedrai errori tipo `Cannot find module '.../src/dist/server.js'`.
+7. **Build Command**: `npm install && npm run build` — obbligatorio: **`tsc`** genera `dist/` (cartella in `.gitignore`, non presente nel clone).
+8. **Start Command**: `npm start` — esegue [`scripts/start.cjs`](./scripts/start.cjs), che punta a `dist/server.js` dalla root del pacchetto e imposta il `cwd` corretto per `dotenv`.
+9. **Branch**: `main`
+10. Clicca **"Create Web Service"**
+
+**Blueprint:** puoi collegare il repo usando il file [`render.yaml`](./render.yaml) così build/start e `NODE_VERSION` restano allineati al codice.
 
 ### 4.2 Configura Environment Variables
 
@@ -230,14 +233,15 @@ Nel Render Dashboard:
 ```
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=(dalla Supabase)
-PORT=5000
 NODE_ENV=production
-CORS_ORIGIN=https://soli-dm-fe.vercel.app
-JWT_SECRET=(genera con crypto)
-LOG_LEVEL=info
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+CORS_ORIGIN=https://tuo-frontend.example.com
+SOLI_DM_API_KEY=(opzionale, chiave condivisa per /api)
 ```
+
+**Note:**
+
+- **`PORT`**: Render in genere imposta da sola la variabile `PORT` ascoltata dal processo. Aggiungi `PORT=5000` solo se sai che non sovrascrive il binding richiesto dalla piattaforma; in dubbio, lascia che sia Render a gestirla.
+- Le variabili `JWT_SECRET`, `LOG_LEVEL`, `RATE_LIMIT_*` nel vecchio esempio non sono tutte usate dall’API attuale: configura solo ciò che è documentato in **`.env.example`** e in **`README.md`**.
 
 3. Render **automaticamente riavvia** il servizio
 

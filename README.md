@@ -323,8 +323,10 @@ npm start
 ### Struttura directory
 
 ```
+scripts/
+└── start.cjs          # Entry produzione dopo build: cwd + require dist/server.js
 src/
-├── server.ts          # Entry: dotenv + listen (usa createApp)
+├── server.ts          # Entry sorgente: dotenv + listen (usa createApp)
 ├── createApp.ts       # Fabbrica Express (middleware + route, senza listen — usata anche dai test)
 ├── lib/
 │   ├── supabase.ts    # Client Supabase (service role)
@@ -339,9 +341,11 @@ src/
 │   ├── races.ts       # D&D races wiki
 │   ├── deities.ts     # D&D deities wiki
 │   └── rules.ts       # D&D core rules
+dist/                  # Generato da `npm run build` (gitignored)
+render.yaml            # Opzionale: Blueprint Render (build, start, NODE_VERSION)
 ```
 
-File di test Vitest: `src/lib/diceRoll.test.ts`, `src/middleware/apiKey.test.ts`, `src/http.integration.test.ts`; setup env in `vitest.setup.ts`.
+File di test Vitest: `src/lib/diceRoll.test.ts`, `src/middleware/apiKey.test.ts`, `src/http.integration.test.ts`; setup env in `vitest.setup.ts`. Deploy dettagliato: **`SETUP.md`**.
 
 ---
 
@@ -351,22 +355,26 @@ File di test Vitest: `src/lib/diceRoll.test.ts`, `src/middleware/apiKey.test.ts`
 
 ```bash
 # Connetti la repo a Railway
-# Imposta le variabili d'ambiente:
-PORT=5000
+# Build: npm install && npm run build
+# Start: npm start
+# Imposta le variabili d'ambiente (come .env.example):
 SUPABASE_URL=...
 SUPABASE_SERVICE_KEY=...
+CORS_ORIGIN=...
+# PORT di solito assegnata dal provider
 
 # Deploy automatico da GitHub
 ```
 
 ### Render
 
-```bash
-# Crea un nuovo Web Service
-# Runtime: Node
-# Build: npm install
-# Start: npm run build && npm start
-```
+- **Root Directory**: lascia vuoto (root del repository, la cartella dove c’è `package.json`). Non impostare `src`: altrimenti `dist/` non coincide con l’output di `tsc` e lo start fallisce.
+- **Build Command**: `npm install && npm run build` (serve `tsc` per generare `dist/`; `dist/` è in `.gitignore` e non va committato).
+- **Start Command**: `npm start` (usa `scripts/start.cjs`, che punta sempre a `dist/server.js` dalla root del pacchetto).
+
+Se nel log compare un path tipo `.../src/dist/server.js`, la Root Directory del servizio è quasi sempre sbagliata oppure la build non è stata eseguita.
+
+Il file [`render.yaml`](./render.yaml) in repo riflette questa configurazione (Node 20 consigliato tramite `NODE_VERSION`).
 
 ---
 
@@ -374,7 +382,8 @@ SUPABASE_SERVICE_KEY=...
 
 - **Supabase Row Level Security (RLS)**: Configura le policy nelle impostazioni Supabase
 - **CORS**: Configura `CORS_ORIGIN` nel `.env` per il tuo dominio frontend
-- **API Key**: Usa `SUPABASE_SERVICE_KEY` **solo** nel backend (mai esporlo al client)
+- **Service role**: `SUPABASE_SERVICE_KEY` **solo** sul server (mai nel browser)
+- **API opzionale**: con `SOLI_DM_API_KEY` attiva, le richieste a `/api/*` richiedono header `x-soli-dm-api-key` o `Authorization: Bearer` (salvo `GET /health`)
 
 ---
 
@@ -391,7 +400,7 @@ SUPABASE_SERVICE_KEY=...
 
 ## 🤝 Contribuire
 
-Vedi [CONTRIBUTING.md](./CONTRIBUTING.md) per le linee guida di sviluppo.
+Apri una issue o una PR su GitHub. Per setup locale e deploy vedi **[SETUP.md](./SETUP.md)**; per contesto rapido per assistenti AI vedi **[AGENTS.md](./AGENTS.md)**.
 
 ---
 

@@ -4,7 +4,7 @@
 
 ## Progetto
 
-API **Express 4** + **TypeScript**, persistenza **Supabase** (client service role in `src/lib/supabase.ts`). Entry di produzione: `src/server.ts` (`dotenv` + `listen`). L’app HTTP è costruita da **`createApp()`** in `src/createApp.ts` (stesso stack senza `listen`, usato da **Vitest** / **supertest**).
+API **Express 4** + **TypeScript**, persistenza **Supabase** (client service role in `src/lib/supabase.ts`). Sorgente: `src/server.ts` (`dotenv` + `listen`). In produzione, dopo `npm run build`, l’entry eseguita è **`dist/server.js`** (CommonJS da `tsc`), avviata tramite **`npm start`** → **`scripts/start.cjs`** (risolve la root del pacchetto, `chdir`, messaggio chiaro se manca `dist/`). L’app HTTP è costruita da **`createApp()`** in `src/createApp.ts` (senza `listen`, usata da **Vitest** / **supertest**).
 
 ## Comandi
 
@@ -23,7 +23,7 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
 ## File utili
 
-`README.md` · `.env.example` · `src/createApp.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
+`README.md` · **`SETUP.md`** (deploy Render passo-passo) · `.env.example` · **`render.yaml`** (Blueprint Render: build, start, `NODE_VERSION`) · **`scripts/start.cjs`** (start produzione) · `src/createApp.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
 
 ## Variabili d’ambiente (sintesi)
 
@@ -32,16 +32,22 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 | `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | Client server-side (mai esporre la service key al browser). |
 | `CORS_ORIGIN` | Se valorizzata, CORS solo quell’origine; altrimenti `origin: true`. |
 | `SOLI_DM_API_KEY` | Se valorizzata, tutte le route `/api/*` richiedono la chiave; **`GET /health`** resta pubblico. |
-| `PORT` | Default `5000`. |
+| `PORT` | Default `5000` in locale; su **Render** usa di solito la variabile `PORT` fornita dalla piattaforma (non forzare `5000` negli env se crea conflitti). |
 
 ## Regole per l’agente
 
-- Non committare `.env` con segreti reali.
+- Non committare `.env` con segreti reali; usare **`.env.example`** come riferimento.
 - Nuove route statiche (wiki): verificare l’**ordine** delle route Express (path fissi prima di `/:param`).
 - Logica ripetibile e testabile: preferire moduli in `src/lib/` (es. dadi) con test dedicati.
+- Dopo cambi a **start/build/deploy**: aggiornare **`AGENTS.md`**, **`README.md`** (sezione Deployment) e **`SETUP.md`** (§ Render) in modo coerente.
 
-## Deploy (Render / altri)
+## Deploy (Render e altri)
 
-- **Build:** `npm run build` → output in `dist/`.
-- **Start:** `npm start` → `node dist/server.js`.
-- Impostare le stesse env del `.env.example` sul provider; allineare `CORS_ORIGIN` al dominio del frontend.
+- **`dist/`** è generato da **`tsc`** ed è in **`.gitignore`**: in produzione serve sempre una fase di **build** sul provider.
+- **Build (Render / CI):** `npm install && npm run build` (o `npm ci && npm run build` con lockfile).
+- **Start:** `npm start` → esegue **`scripts/start.cjs`**, che carica **`dist/server.js`** dalla **root del repository** (stessa cartella di `package.json`). Non avviare `node dist/server.js` con working directory errata (es. solo `src`).
+- **Render — Root Directory:** lasciare **vuota** (root del repo). Se si imposta `src`, i path di `dist/` non coincidono con l’output di `tsc` e compaiono errori tipo `.../src/dist/server.js` mancante.
+- **Node:** preferire **20.x** in produzione (`engines` in `package.json`; in `render.yaml` è impostato **`NODE_VERSION`** come riferimento per il Blueprint).
+- Variabili: allineare **`CORS_ORIGIN`** al dominio del frontend; stesse chiavi sensate del **`.env.example`** (senza committare segreti).
+
+Dettaglio operativo: **`SETUP.md`** § 4; riepilogo in **`README.md`** § Deployment.

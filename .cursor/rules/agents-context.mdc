@@ -1,0 +1,9 @@
+---
+description: Contesto repo soli-dm-be per assistenti AI
+---
+
+# Policy contesto repository
+
+Prima di task su **API Express, deploy Render, Supabase, test Vitest** di questo backend, **leggi `AGENTS.md`** nella root e allinea con **`README.md`** e **`SETUP.md`** (deploy).
+
+Non committare `.env` con segreti; usare solo **`.env.example`** come riferimento.

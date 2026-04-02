@@ -7,7 +7,7 @@
     "dev": "node --loader tsx src/server.ts",
     "build": "tsc",
     "postbuild": "echo 'Build completed successfully'",
-    "start": "node dist/server.js",
+    "start": "node scripts/start.cjs",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
