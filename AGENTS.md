@@ -8,7 +8,7 @@ API **Express 4** + **TypeScript**, persistenza **Supabase** (client service rol
 
 ## Comandi
 
-`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`** · **`npm run smoke:cors`** (preflight OPTIONS reale verso `SMOKE_API_URL` / `SMOKE_ORIGIN`)
+`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`** · **`npm run smoke:cors`** · **`npm run smoke:api`** (health + wiki + dadi su `SMOKE_API_URL`, opz. `SMOKE_API_KEY`)
 
 Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 
@@ -18,6 +18,8 @@ Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 - **`src/lib/diceRoll.test.ts`**: notazione `NdX`, limiti, RNG iniettato.
 - **`src/middleware/apiKey.test.ts`**: `SOLI_DM_API_KEY` opzionale, header `x-soli-dm-api-key` / `Bearer`.
 - **`src/http.integration.test.ts`**: `GET /health`, `GET /api/classes`, API key, `OPTIONS` CORS preflight, ordine route `GET /api/rules/ability-scores/list`, `POST /api/dice/roll`.
+- **`src/wiki.integration.test.ts`**: wiki completa — classi/razze/dettagli/404, divinità + filtro allineamento + ordine route, regole (categorie, `ability-scores/list`, categorie singole, 404).
+- **`src/api.routes.integration.test.ts`**: `404` generico, `dice/roll-multiple`, `dice/history` senza `campaign_id`, API key su `/api/races`.
 - **`src/lib/corsConfig.test.ts`**: allowlist, preview Vercel, virgolette in env.
 
 I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).

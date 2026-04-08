@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "smoke:cors": "node scripts/cors-smoke.mjs"
+    "smoke:cors": "node scripts/cors-smoke.mjs",
+    "smoke:api": "node scripts/api-smoke.mjs"
   },
   "keywords": [
     "dnd",
