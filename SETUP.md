@@ -333,7 +333,7 @@ npm run lint  # (se configurato)
 
 ### **Errore: "CORS error" / preflight non passa / `net::ERR_FAILED` dal browser**
 
-Chrome spesso dice *«Response to preflight request doesn't pass access control check: It does not have HTTP ok status»*: spesso significa che il server ha risposto **401/403/500** al **OPTIONS** oppure senza `Access-Control-Allow-Origin` corretto.
+Chrome spesso dice *«Response to preflight request doesn't pass access control check: It does not have HTTP ok status»*: significa che il **OPTIONS** non è andato a buon fine (es. **500** se l’origine non è in allowlist) oppure manca del tutto `Access-Control-Allow-Origin`. Se vedi **200** con body `GET,HEAD,POST` e **nessun** header CORS, l’origine non è stata accettata e la richiesta è “scivolata” oltre il middleware CORS (da evitare in produzione: allinea `CORS_ORIGIN`).
 
 1. **Allinea le env su Render** (dashboard del servizio → *Environment*):  
    - `CORS_ORIGIN=https://soli-dm-fe.vercel.app` (nessun path, **senza virgolette** nel valore; se le avevi incollate, il backend ora le ignora ma conviene pulirle).  

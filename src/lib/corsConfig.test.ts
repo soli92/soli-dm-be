@@ -104,9 +104,8 @@ describe("corsConfig", () => {
       });
     });
     await new Promise<void>((resolve) => {
-      fn("https://other.com", (err, ok) => {
-        expect(err).toBeNull();
-        expect(ok).toBe(false);
+      fn("https://other.com", (err) => {
+        expect(err).toBeInstanceOf(Error);
         resolve();
       });
     });

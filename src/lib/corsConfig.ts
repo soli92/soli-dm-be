@@ -103,9 +103,11 @@ export function buildCorsOptions(): CorsOptions {
         callback(null, true);
         return;
       }
-      // `callback(Error)` fa rispondere il middleware cors con 500 — il browser segnala
-      // solo “preflight non OK”. Meglio negare senza errore (es. 204 senza ACAO).
-      callback(null, false);
+      // NB: con `cors@2.x`, `callback(null, false)` NON nega in modo valido: il wrapper
+      // interpreta `!origin` e chiama `next()` senza applicare header CORS → risposta OPTIONS
+      // generica Express (200 + Allow) e il browser blocca comunque. L’API ufficiale per
+      // rifiutare è passare un Error (→ next(err), tipicamente 500).
+      callback(new Error("Not allowed by CORS"));
     },
   };
 }
