@@ -6,11 +6,20 @@
 
 API **Express 4** + **TypeScript**, persistenza **Supabase** (client service role in `src/lib/supabase.ts`). Sorgente: `src/server.ts` (`dotenv` + `listen`). In produzione, dopo `npm run build`, l’entry eseguita è **`dist/server.js`** (CommonJS da `tsc`), avviata tramite **`npm start`** → **`scripts/start.cjs`**: trova la directory con `package.json` (`"name": "soli-dm-be"`). Su **Render** (`RENDER` valorizzato), se `dist/server.js` manca, esegue **una volta** `npm run build` da quella root prima di fallire (mitiga build command / Root Directory errati; preferibile comunque root repo vuota e `npm ci && npm run build` in fase build). L’app HTTP è costruita da **`createApp()`** in `src/createApp.ts` (senza `listen`, usata da **Vitest** / **supertest**).
 
+**Wiki classi/razze:** lettura da tabella **`wiki_srd_cache`** se presente almeno una riga per `resource_type` `class` o `race`; altrimenti **`src/data/wikiClassesStatic.ts`** / **`wikiRacesStatic.ts`**. I test con mock Supabase vuoto usano il fallback statico. Divinità e regole core restano in **`routes/deities.ts`** / **`routes/rules.ts`** (statiche).
+
 ## Comandi
 
-`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`** · **`npm run smoke:cors`** · **`npm run smoke:api`** (health + wiki + dadi su `SMOKE_API_URL`, opz. `SMOKE_API_KEY`)
+`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`** · **`npm run smoke:cors`** · **`npm run smoke:api`** (health + wiki + dadi su `SMOKE_API_URL`, opz. `SMOKE_API_KEY`) · **`npm run sync:wiki-srd`** (popola `wiki_srd_cache` da dnd5eapi.co; richiede `.env` con Supabase)
 
 Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
+
+## Wiki SRD (sync esterno)
+
+- **Tabella:** `wiki_srd_cache` — DDL e istruzioni in **`SETUP.md`** (blocco SQL principale + § 3.3).
+- **Comando:** `npm run sync:wiki-srd` — scarica da **dnd5eapi.co** (default `SOLI_DND5E_API_BASE=https://www.dnd5eapi.co/api/2014`) classi, razze e rule sections SRD; upsert su Supabase. Richiede `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` in `.env`.
+- **Cron:** schedulare lo stesso comando (es. GitHub Actions o job Render) per tenere la cache aggiornata; non esporre mai la service key al client.
+- **Script sorgente:** `src/scripts/syncWikiSrd.ts` (eseguito con **tsx**, non incluso nell’avvio del server).
 
 ## Test
 
@@ -24,7 +33,7 @@ Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 
 ### Mock Supabase (globale)
 
-- **`vitest.setup.ts`** importa **`src/test/registerSupabaseMock.ts`**: sostituisce `lib/supabase` con un client in-memory (builder thenable + **coda FIFO** + **fallback**).
+- **`vitest.setup.ts`** importa **`src/test/registerSupabaseMock.ts`**: sostituisce `lib/supabase` con un client in-memory (builder thenable + **coda FIFO** + **fallback**). Il builder espone **`.single()`** e **`.maybeSingle()`** (entrambi consumano un risultato dalla coda).
 - Ogni test parte con **`mockDb.reset()`** (già in `beforeEach` nel register).
 - Nei test: **`mockDb.setFallback(dbList([...]))`** per una risposta ripetuta; **`mockDb.enqueue(dbOk(...))`** per N query in sequenza (es. insert poi altro).
 - Helper: **`dbOk`**, **`dbList`**, **`dbErr`** nello stesso modulo.
@@ -47,7 +56,7 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
 ## File utili
 
-`README.md` · **`SETUP.md`** (deploy Render passo-passo) · `.env.example` · **`render.yaml`** (Blueprint Render: build, start, `NODE_VERSION`) · **`scripts/start.cjs`** (start produzione) · `src/createApp.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
+`README.md` · **`SETUP.md`** (deploy Render, SQL incluso `wiki_srd_cache`, § sync wiki) · `.env.example` · **`render.yaml`** · **`scripts/start.cjs`** · `src/createApp.ts` · `src/lib/wikiSrd/*` · `src/scripts/syncWikiSrd.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
 
 ## Variabili d’ambiente (sintesi)
 
@@ -58,6 +67,7 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 | `CORS_ALLOW_VERCEL_PREVIEW` | `true` / `1` / `yes`: consente anche `https://*.vercel.app` il cui host contiene `CORS_VERCEL_PREVIEW_SUBSTRING` (default `soli-dm`) — utile per deploy preview ≠ `soli-dm-fe.vercel.app`. |
 | `SOLI_DM_API_KEY` | Se valorizzata, le route `/api/*` richiedono la chiave (**non** le richieste **OPTIONS**); **`GET /health`** resta pubblico. |
 | `PORT` | Default `5000` in locale; su **Render** usa di solito la variabile `PORT` fornita dalla piattaforma (non forzare `5000` negli env se crea conflitti). |
+| `SOLI_DND5E_API_BASE` | Opzionale. Base URL API per **`npm run sync:wiki-srd`** (default `https://www.dnd5eapi.co/api/2014`). |
 
 ## Regole per l’agente
 

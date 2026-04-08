@@ -114,7 +114,7 @@ const dndDeities = [
     domain: "Dwarves, Creation",
     description: "Creator of dwarves, god of forge and mining",
     holy_symbol: "Hammer and anvil",
-    typical_worshippers: ["Dwarves", "Blacksmiths", "Miners"],
+    typical_worshippers: "Dwarves, blacksmiths, miners",
   },
   {
     name: "Myrkul",

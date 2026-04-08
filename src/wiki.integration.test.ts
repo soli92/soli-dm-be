@@ -3,8 +3,8 @@ import request from "supertest";
 import { createApp } from "./createApp";
 
 /**
- * Copertura approfondita delle route wiki (dati statici, nessun Supabase).
- * Allineate a classes.ts, races.ts, deities.ts, rules.ts.
+ * Route wiki: classi/razze usano Supabase `wiki_srd_cache` se popolata; con mock vuoto → fallback statico.
+ * Divinità e regole restano statiche in routes.
  */
 describe("Wiki API (integration)", () => {
   const prevKey = process.env.SOLI_DM_API_KEY;

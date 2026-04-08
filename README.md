@@ -11,11 +11,10 @@ Questo repository contiene il **Backend API** costruito con **Node.js + Express 
 - **🎯 Gestione Campagne** — Crea, gestisci, elimina campagne D&D
 - **👤 Gestione Personaggi** — Censisci i tuoi personaggi con stats, classe, razza e background
 - **🎲 Simulatore Dadi** — Lancia dadi in tempo reale (d4, d6, d8, d10, d12, d20, etc.)
-- **📚 Wiki D&D** — Accesso completo alle informazioni di D&D 5e:
-  - 12 Classi (Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard)
-  - 12 Razze (Dragonborn, Dwarf, Elf, Gnome, Half-Elf, Half-Orc, Halfling, Human, Tiefling, Asimar, Genasi, Goliath)
-  - 20+ Divinità (Forgotten Realms pantheon)
-  - Regole core (Ability Scores, Combat, Saving Throws, Resting, Multiclassing)
+- **📚 Wiki D&D** — Classi e razze: lettura da Supabase (`wiki_srd_cache`) se popolata tramite sync SRD, altrimenti fallback statico in codice. Divinità e categorie regole core restano servizi statici nell’API.
+  - Classi SRD (12) e razze SRD (9) quando la cache è allineata a [dnd5eapi.co](https://www.dnd5eapi.co/) (dataset 2014); fallback statico include anche razze extra non in SRD.
+  - 20+ Divinità (pantheon stile Forgotten Realms, dati statici)
+  - Regole core in categorie curate (Ability Scores, Combat, … — statiche)
 
 ---
 
@@ -47,7 +46,8 @@ cp .env.example .env
 1. Crea un nuovo progetto su [Supabase](https://supabase.com)
 2. Copia `SUPABASE_URL` e `SUPABASE_SERVICE_KEY` dal dashboard
 3. Incolla i valori nel tuo `.env`
-4. Esegui la migration del database (vedi sotto)
+4. Esegui la migration del database (vedi sotto), inclusa la tabella `wiki_srd_cache` se usi la wiki sincronizzata con l’SRD
+5. (Opzionale) Popola la cache wiki: `npm run sync:wiki-srd` — richiede `SUPABASE_*` in `.env`; dettaglio in **SETUP.md** § 3.3
 
 ### Avvia il server
 
@@ -206,6 +206,8 @@ curl "http://localhost:5000/api/dice/history?campaign_id=uuid&limit=20"
 
 ### 📚 Wiki D&D
 
+Le risposte di **classi** e **razze** hanno la stessa forma JSON di sempre; la sorgente è la tabella `wiki_srd_cache` se contiene righe per `resource_type` `class` / `race`, altrimenti i dati statici nel repository. Per aggiornare la cache da remoto vedi **`npm run sync:wiki-srd`** e **SETUP.md** § 3.3.
+
 #### Classi
 ```
 GET /api/classes           # Lista tutte le classi
@@ -306,6 +308,20 @@ result_rolls  INTEGER[] (array of individual rolls)
 created_at    TIMESTAMP
 ```
 
+### `wiki_srd_cache` (wiki SRD opzionale)
+```sql
+id             UUID (PK)
+resource_type  TEXT  -- 'class' | 'race' | 'rule_section'
+index_slug     TEXT  -- slug API (es. bard, half-elf)
+name           TEXT
+payload        JSONB -- risposta grezza / arricchita da dnd5eapi.co
+source         TEXT  -- default 'dnd5eapi'
+fetched_at     TIMESTAMPTZ
+UNIQUE (resource_type, index_slug)
+```
+
+Popolazione: `npm run sync:wiki-srd` (variabile opzionale `SOLI_DND5E_API_BASE`). Le sezioni regole SRD in cache non sono ancora esposte come sostituto di `GET /api/rules`; restano disponibili per estensioni future.
+
 ---
 
 ## 🛠️ Sviluppo
@@ -328,6 +344,9 @@ npm run build
 
 # Avvia il build prodotto
 npm start
+
+# Sincronizza classi, razze e rule sections SRD → Supabase (richiede .env)
+npm run sync:wiki-srd
 ```
 
 ### Struttura directory
@@ -338,17 +357,23 @@ scripts/
 src/
 ├── server.ts          # Entry sorgente: dotenv + listen (usa createApp)
 ├── createApp.ts       # Fabbrica Express (middleware + route, senza listen — usata anche dai test)
+├── data/
+│   ├── wikiClassesStatic.ts  # Fallback wiki classi se DB vuoto
+│   └── wikiRacesStatic.ts    # Fallback wiki razze se DB vuoto
 ├── lib/
 │   ├── supabase.ts    # Client Supabase (service role)
-│   └── diceRoll.ts    # Logica pura notazione NdX (testata)
+│   ├── diceRoll.ts    # Logica pura notazione NdX (testata)
+│   └── wikiSrd/       # Client dnd5eapi, mapper, lettura cache Supabase
+├── scripts/
+│   └── syncWikiSrd.ts # Eseguito via npm run sync:wiki-srd (tsx)
 ├── middleware/
 │   └── apiKey.ts      # API key opzionale su /api
 ├── routes/
 │   ├── campaigns.ts   # Campaign CRUD
 │   ├── characters.ts  # Character CRUD
 │   ├── dice.ts        # Dice roller
-│   ├── classes.ts     # D&D classes wiki
-│   ├── races.ts       # D&D races wiki
+│   ├── classes.ts     # Wiki classi (DB + fallback statico)
+│   ├── races.ts       # Wiki razze (DB + fallback statico)
 │   ├── deities.ts     # D&D deities wiki
 │   └── rules.ts       # D&D core rules
 dist/                  # Generato da `npm run build` (gitignored)
@@ -403,7 +428,7 @@ Il file [`render.yaml`](./render.yaml) in repo riflette questa configurazione (N
 - [ ] Spell database completo
 - [ ] Monster/NPC compendium
 - [ ] Initiative tracker in real-time (WebSocket)
-- [ ] Integrazione con OGL API (Open Game License)
+- [ ] Esporre in API le `rule_section` già in `wiki_srd_cache` (sostituto o affiancamento di `GET /api/rules`)
 - [ ] Export/Import campagne (JSON)
 
 ---
@@ -423,6 +448,7 @@ MIT © [soli92](https://github.com/soli92)
 ## 🎯 Link Utili
 
 - **Frontend**: [soli92/soli-dm-fe](https://github.com/soli92/soli-dm-fe)
+- **D&D 5e SRD API (sync wiki)**: https://www.dnd5eapi.co/
 - **D&D 5e Official SRD**: https://dnd5e.wikidot.com/
 - **Forgotten Realms Wiki**: https://forgottenrealms.fandom.com/
 

@@ -196,6 +196,19 @@ CREATE TABLE dice_rolls (
   result_rolls INT[],
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Cache wiki SRD (popolata da `npm run sync:wiki-srd`, fonte dnd5eapi.co)
+CREATE TABLE wiki_srd_cache (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_type TEXT NOT NULL CHECK (resource_type IN ('class', 'race', 'rule_section')),
+  index_slug TEXT NOT NULL,
+  name TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}',
+  source TEXT NOT NULL DEFAULT 'dnd5eapi',
+  fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (resource_type, index_slug)
+);
+CREATE INDEX IF NOT EXISTS wiki_srd_cache_resource_name_idx ON wiki_srd_cache (resource_type, name);
 ```
 
 Se le tabelle non esistono, creale manualmente su Supabase:
@@ -203,6 +216,18 @@ Se le tabelle non esistono, creale manualmente su Supabase:
 2. Clicca **"New Query"**
 3. Incolla il SQL sopra
 4. Clicca **Run**
+
+### 3.3 Wiki SRD — sync da API esterna
+
+Dopo aver creato `wiki_srd_cache`, in locale (o in CI schedulato) con `.env` che contiene `SUPABASE_URL` e `SUPABASE_SERVICE_KEY`:
+
+```bash
+npm run sync:wiki-srd
+```
+
+Scarica classi, razze e sezioni regole da **dnd5eapi.co** (SRD 2014) e fa upsert su `wiki_srd_cache`. Le route `GET /api/classes` e `GET /api/races` usano il DB se la cache ha almeno una riga per quel tipo, altrimenti fallback statico.
+
+Variabile opzionale: `SOLI_DND5E_API_BASE` (default `https://www.dnd5eapi.co/api/2014`).
 
 ---
 

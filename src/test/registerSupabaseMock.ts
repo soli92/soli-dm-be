@@ -33,6 +33,7 @@ function createSupabaseTestDouble(): SupabaseTestDoubleController {
     b.order = chain;
     b.limit = chain;
     b.single = () => Promise.resolve(dequeue());
+    b.maybeSingle = () => Promise.resolve(dequeue());
     b.then = (onFulfilled: (value: unknown) => unknown) =>
       Promise.resolve(dequeue()).then(onFulfilled);
     return b;

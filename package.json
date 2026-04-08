@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "smoke:cors": "node scripts/cors-smoke.mjs",
-    "smoke:api": "node scripts/api-smoke.mjs"
+    "smoke:api": "node scripts/api-smoke.mjs",
+    "sync:wiki-srd": "tsx src/scripts/syncWikiSrd.ts"
   },
   "keywords": [
     "dnd",
