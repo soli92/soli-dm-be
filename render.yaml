@@ -14,6 +14,9 @@ services:
         value: production
       - key: NODE_VERSION
         value: "20.18.0"
+      # Frontend produzione (override in dashboard se usi altro dominio)
+      - key: CORS_ORIGIN
+        value: https://soli-dm-fe.vercel.app
       # Consenti preview Vercel (*.vercel.app con "soli-dm" nel nome host) oltre a CORS_ORIGIN
       - key: CORS_ALLOW_VERCEL_PREVIEW
         value: "true"

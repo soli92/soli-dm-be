@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import {
   parseCorsOriginList,
+  normalizeCorsOrigin,
   isVercelPreviewOriginAllowed,
   buildCorsOptions,
 } from "./corsConfig";
@@ -15,6 +16,18 @@ describe("corsConfig", () => {
   it("parseCorsOriginList splitta per virgola", () => {
     process.env.CORS_ORIGIN = "https://a.app, https://b.app ";
     expect(parseCorsOriginList()).toEqual(["https://a.app", "https://b.app"]);
+  });
+
+  it("parseCorsOriginList normalizza slash finali e path", () => {
+    process.env.CORS_ORIGIN = "https://fe.vercel.app/,https://x.app/path";
+    expect(parseCorsOriginList()).toEqual([
+      "https://fe.vercel.app",
+      "https://x.app",
+    ]);
+  });
+
+  it("normalizeCorsOrigin gestisce stringhe non URL", () => {
+    expect(normalizeCorsOrigin("https://z.app/")).toBe("https://z.app");
   });
 
   it("isVercelPreviewOriginAllowed rispetta il flag e il sottostringa host", () => {
@@ -42,6 +55,22 @@ describe("corsConfig", () => {
     const o = buildCorsOptions();
     expect(o.origin).toBe(true);
     expect(o.credentials).toBe(true);
+  });
+
+  it("buildCorsOptions accetta origine browser se env ha slash finale", async () => {
+    process.env.CORS_ORIGIN = "https://prod.example.com/";
+    const o = buildCorsOptions();
+    const fn = o.origin as (
+      origin: string | undefined,
+      cb: (err: Error | null, ok?: boolean) => void
+    ) => void;
+    await new Promise<void>((resolve) => {
+      fn("https://prod.example.com", (err, ok) => {
+        expect(err).toBeNull();
+        expect(ok).toBe(true);
+        resolve();
+      });
+    });
   });
 
   it("buildCorsOptions con lista chiama callback per origine consentita", async () => {

@@ -1,10 +1,21 @@
 import type { CorsOptions } from "cors";
 
+/** Normalizza un'origine per il confronto (slash finali, path accidentali in env). */
+export function normalizeCorsOrigin(value: string): string {
+  const t = value.trim();
+  if (!t) return t;
+  try {
+    return new URL(t).origin;
+  } catch {
+    return t.replace(/\/+$/, "");
+  }
+}
+
 /** Origini esplicite da CORS_ORIGIN (virgola = più URL). */
 export function parseCorsOriginList(): string[] {
   return (
     process.env.CORS_ORIGIN?.split(",")
-      .map((s) => s.trim())
+      .map((s) => normalizeCorsOrigin(s))
       .filter(Boolean) ?? []
   );
 }
@@ -51,7 +62,8 @@ export function buildCorsOptions(): CorsOptions {
         callback(null, true);
         return;
       }
-      if (staticList.includes(origin)) {
+      const normalized = normalizeCorsOrigin(origin);
+      if (staticList.includes(normalized)) {
         callback(null, true);
         return;
       }
