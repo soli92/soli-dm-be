@@ -20,6 +20,7 @@ Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 - **`src/http.integration.test.ts`**: `GET /health`, `GET /api/classes`, API key, `OPTIONS` CORS preflight, ordine route `GET /api/rules/ability-scores/list`, `POST /api/dice/roll`.
 - **`src/wiki.integration.test.ts`**: wiki completa — classi/razze/dettagli/404, divinità + filtro allineamento + ordine route, regole (categorie, `ability-scores/list`, categorie singole, 404).
 - **`src/api.routes.integration.test.ts`**: `404` generico, `dice/roll-multiple`, `dice/history` senza `campaign_id`, API key su `/api/races`.
+- **`src/campaigns-characters.integration.test.ts`**: `vi.mock("./lib/supabase")` con builder thenable; CRUD campagne e personaggi, validazioni 400, 404, 500 su errore DB, API key.
 - **`src/lib/corsConfig.test.ts`**: allowlist, preview Vercel, virgolette in env.
 
 I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
