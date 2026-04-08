@@ -30,6 +30,15 @@ describe("HTTP (createApp)", () => {
     expect(res.body.timestamp).toBeDefined();
   });
 
+  it("GET /api/campaigns con mock default → lista vuota", async () => {
+    delete process.env.SOLI_DM_API_KEY;
+    const app = createApp();
+    const res = await request(app).get("/api/campaigns").expect(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toEqual([]);
+    expect(res.body.count).toBe(0);
+  });
+
   it("GET /api/classes returns wiki data when no API key configured", async () => {
     delete process.env.SOLI_DM_API_KEY;
     const app = createApp();

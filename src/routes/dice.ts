@@ -23,7 +23,7 @@ router.post("/roll", async (req: Request, res: Response) => {
 
     // Salva il roll nel database (opzionale)
     if (campaign_id) {
-      await supabase.from("dice_rolls").insert([
+      const { error: insertError } = await supabase.from("dice_rolls").insert([
         {
           campaign_id,
           character_id: character_id || null,
@@ -32,6 +32,7 @@ router.post("/roll", async (req: Request, res: Response) => {
           result_rolls: result.rolls,
         },
       ]);
+      if (insertError) throw insertError;
     }
 
     res.json({

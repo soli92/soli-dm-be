@@ -14,14 +14,34 @@ Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 
 ## Test
 
-- **Vitest** (`vitest.config.ts`), setup env fittizi in **`vitest.setup.ts`** (`SUPABASE_URL` / `SUPABASE_SERVICE_KEY`) così `@supabase/supabase-js` si inizializza al caricamento delle route senza progetto reale.
+### Struttura (scalabile)
+
+| Layer | Dove | Scopo |
+|--------|------|--------|
+| **Unit / puro** | `src/lib/*.test.ts`, `src/middleware/*.test.ts` | Logica senza HTTP né DB. |
+| **Integrazione HTTP** | `src/*.integration.test.ts` | `supertest` + `createApp()`; route reali. |
+| **Smoke produzione** | `npm run smoke:cors`, `npm run smoke:api` | Verifica reale (CORS + endpoint pubblici). |
+
+### Mock Supabase (globale)
+
+- **`vitest.setup.ts`** importa **`src/test/registerSupabaseMock.ts`**: sostituisce `lib/supabase` con un client in-memory (builder thenable + **coda FIFO** + **fallback**).
+- Ogni test parte con **`mockDb.reset()`** (già in `beforeEach` nel register).
+- Nei test: **`mockDb.setFallback(dbList([...]))`** per una risposta ripetuta; **`mockDb.enqueue(dbOk(...))`** per N query in sequenza (es. insert poi altro).
+- Helper: **`dbOk`**, **`dbList`**, **`dbErr`** nello stesso modulo.
+- **`src/test/integrationHarness.ts`**: es. **`useSilencedHttpLogs()`** per i `describe` HTTP.
+
+Nuove route che usano Supabase: aggiungere casi in un `*.integration.test.ts` esistente o nuovo file; configurare la coda/fallback prima della richiesta `supertest`.
+
+### File test
+
 - **`src/lib/diceRoll.test.ts`**: notazione `NdX`, limiti, RNG iniettato.
-- **`src/middleware/apiKey.test.ts`**: `SOLI_DM_API_KEY` opzionale, header `x-soli-dm-api-key` / `Bearer`.
-- **`src/http.integration.test.ts`**: `GET /health`, `GET /api/classes`, API key, `OPTIONS` CORS preflight, ordine route `GET /api/rules/ability-scores/list`, `POST /api/dice/roll`.
-- **`src/wiki.integration.test.ts`**: wiki completa — classi/razze/dettagli/404, divinità + filtro allineamento + ordine route, regole (categorie, `ability-scores/list`, categorie singole, 404).
-- **`src/api.routes.integration.test.ts`**: `404` generico, `dice/roll-multiple`, `dice/history` senza `campaign_id`, API key su `/api/races`.
-- **`src/campaigns-characters.integration.test.ts`**: `vi.mock("./lib/supabase")` con builder thenable; CRUD campagne e personaggi, validazioni 400, 404, 500 su errore DB, API key.
-- **`src/lib/corsConfig.test.ts`**: allowlist, preview Vercel, virgolette in env.
+- **`src/middleware/apiKey.test.ts`**: `SOLI_DM_API_KEY`, header `x-soli-dm-api-key` / `Bearer`.
+- **`src/lib/corsConfig.test.ts`**: allowlist CORS, preview Vercel, virgolette in env.
+- **`src/http.integration.test.ts`**: health, campagne lista vuota (mock default), classi, API key, CORS preflight, `rules/ability-scores/list`, `POST /api/dice/roll`.
+- **`src/wiki.integration.test.ts`**: wiki (classi, razze, divinità, regole).
+- **`src/api.routes.integration.test.ts`**: 404, `dice/roll-multiple`, `dice/history` senza `campaign_id`, API key su `/api/races`.
+- **`src/campaigns-characters.integration.test.ts`**: CRUD campagne e personaggi + errori Supabase + API key.
+- **`src/dice.integration.test.ts`**: `POST /roll` con persistenza, `GET /history`, `GET /history/:id`.
 
 I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
