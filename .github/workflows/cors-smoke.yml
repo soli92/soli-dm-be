@@ -1,0 +1,20 @@
+# Smoke test CORS contro produzione (nessun segreto richiesto).
+# Esegui manualmente dopo deploy Render o quando il browser segnala errori CORS.
+name: CORS smoke (production)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cors-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Preflight OPTIONS + /health
+        run: node scripts/cors-smoke.mjs
+        env:
+          SMOKE_API_URL: https://soli-dm-be.onrender.com
+          SMOKE_ORIGIN: https://soli-dm-fe.vercel.app

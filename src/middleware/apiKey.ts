@@ -9,6 +9,11 @@ export function requireApiKeyWhenConfigured(
   res: Response,
   next: NextFunction
 ): void {
+  if (req.method === "OPTIONS") {
+    next();
+    return;
+  }
+
   const configured = process.env.SOLI_DM_API_KEY?.trim();
   if (!configured) {
     next();

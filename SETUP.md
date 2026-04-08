@@ -331,9 +331,26 @@ npm run lint  # (se configurato)
 → Il servizio Render è in sleep (free tier sleep dopo 15 min inattività)
 → Soluzione: Aspetta 1-2 minuti che si riavvii
 
-### **Errore: "CORS error" dal frontend**
-→ `CORS_ORIGIN` non coincide con l’origine del browser (es. preview Vercel ≠ produzione)
-→ Soluzione: imposta `CORS_ORIGIN` sull’URL di **produzione** e aggiungi **`CORS_ALLOW_VERCEL_PREVIEW=true`** per le preview `*.vercel.app` che contengono `soli-dm` nell’hostname (vedi `.env.example`).
+### **Errore: "CORS error" / preflight non passa / `net::ERR_FAILED` dal browser**
+
+Chrome spesso dice *«Response to preflight request doesn't pass access control check: It does not have HTTP ok status»*: spesso significa che il server ha risposto **401/403/500** al **OPTIONS** oppure senza `Access-Control-Allow-Origin` corretto.
+
+1. **Allinea le env su Render** (dashboard del servizio → *Environment*):  
+   - `CORS_ORIGIN=https://soli-dm-fe.vercel.app` (nessun path, **senza virgolette** nel valore; se le avevi incollate, il backend ora le ignora ma conviene pulirle).  
+   - `CORS_ALLOW_VERCEL_PREVIEW=true` se usi anche deploy preview Vercel.  
+   Il file `render.yaml` nel repo ha già questi default: se il servizio è stato creato a mano, le variabili in dashboard **non** si aggiornano da soli dal repo.
+
+2. **Controlla i log di avvio**: dopo il deploy compare una riga `[cors] allowlist (N): …` con le origini effettivamente lette.
+
+3. **Test reale da CLI** (dopo `npm install` nella root del backend):
+
+   ```bash
+   npm run smoke:cors
+   ```
+
+   Oppure GitHub → *Actions* → **CORS smoke (production)** → *Run workflow*.
+
+4. Se usi **`SOLI_DM_API_KEY`**: le richieste **OPTIONS** non devono richiedere la chiave (il middleware le esclude); se una vecchia versione la richiedeva, aggiorna il backend.
 
 ### **Errore: "Invalid JWT"**
 → `JWT_SECRET` è diverso tra deploy locali e produttivi

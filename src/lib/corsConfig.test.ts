@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import {
   parseCorsOriginList,
   normalizeCorsOrigin,
+  stripCorsEnvFragment,
   isVercelPreviewOriginAllowed,
   buildCorsOptions,
 } from "./corsConfig";
@@ -28,6 +29,20 @@ describe("corsConfig", () => {
 
   it("normalizeCorsOrigin gestisce stringhe non URL", () => {
     expect(normalizeCorsOrigin("https://z.app/")).toBe("https://z.app");
+  });
+
+  it("stripCorsEnvFragment rimuove virgolette e BOM", () => {
+    expect(stripCorsEnvFragment('\uFEFF"https://x.app"')).toBe("https://x.app");
+    expect(stripCorsEnvFragment("'https://y.app'")).toBe("https://y.app");
+  });
+
+  it("parseCorsOriginList accetta valori tra virgolette (dashboard)", () => {
+    process.env.CORS_ORIGIN =
+      '"https://soli-dm-fe.vercel.app", https://alt.app ';
+    expect(parseCorsOriginList()).toEqual([
+      "https://soli-dm-fe.vercel.app",
+      "https://alt.app",
+    ]);
   });
 
   it("isVercelPreviewOriginAllowed rispetta il flag e il sottostringa host", () => {
@@ -89,8 +104,9 @@ describe("corsConfig", () => {
       });
     });
     await new Promise<void>((resolve) => {
-      fn("https://other.com", (err) => {
-        expect(err).toBeInstanceOf(Error);
+      fn("https://other.com", (err, ok) => {
+        expect(err).toBeNull();
+        expect(ok).toBe(false);
         resolve();
       });
     });

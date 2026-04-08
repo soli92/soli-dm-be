@@ -1,8 +1,20 @@
 import type { CorsOptions } from "cors";
 
+/** Rimuove BOM e virgolette tipiche da dashboard (es. Render) incollate per sbaglio. */
+export function stripCorsEnvFragment(raw: string): string {
+  let t = raw.replace(/^\uFEFF/, "").trim();
+  if (
+    (t.startsWith('"') && t.endsWith('"')) ||
+    (t.startsWith("'") && t.endsWith("'"))
+  ) {
+    t = t.slice(1, -1).trim();
+  }
+  return t;
+}
+
 /** Normalizza un'origine per il confronto (slash finali, path accidentali in env). */
 export function normalizeCorsOrigin(value: string): string {
-  const t = value.trim();
+  const t = stripCorsEnvFragment(value);
   if (!t) return t;
   try {
     return new URL(t).origin;
@@ -17,6 +29,26 @@ export function parseCorsOriginList(): string[] {
     process.env.CORS_ORIGIN?.split(",")
       .map((s) => normalizeCorsOrigin(s))
       .filter(Boolean) ?? []
+  );
+}
+
+/** Log non sensibile all’avvio: aiuta a capire perché un’origine non matcha su Render. */
+export function logCorsStartup(): void {
+  const list = parseCorsOriginList();
+  const preview = process.env.CORS_ALLOW_VERCEL_PREVIEW?.trim().toLowerCase();
+  const previewOn =
+    preview === "true" || preview === "1" || preview === "yes";
+  if (list.length === 0) {
+    console.info(
+      "[cors] nessun CORS_ORIGIN: origini consentite = qualsiasi (solo per dev/test)"
+    );
+    return;
+  }
+  console.info(
+    `[cors] allowlist (${list.length}): ${list.join(" | ")}` +
+      (previewOn
+        ? "; preview Vercel (*.vercel.app con sottostringa) = sì"
+        : "; preview Vercel = no")
   );
 }
 
@@ -71,7 +103,9 @@ export function buildCorsOptions(): CorsOptions {
         callback(null, true);
         return;
       }
-      callback(new Error("Not allowed by CORS"));
+      // `callback(Error)` fa rispondere il middleware cors con 500 — il browser segnala
+      // solo “preflight non OK”. Meglio negare senza errore (es. 204 senza ACAO).
+      callback(null, false);
     },
   };
 }

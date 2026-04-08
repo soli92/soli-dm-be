@@ -4,6 +4,8 @@ import { createApp } from "./createApp";
 
 describe("HTTP (createApp)", () => {
   const prevKey = process.env.SOLI_DM_API_KEY;
+  const prevCors = process.env.CORS_ORIGIN;
+  const prevVercelPreview = process.env.CORS_ALLOW_VERCEL_PREVIEW;
 
   beforeEach(() => {
     vi.spyOn(console, "log").mockImplementation(() => {});
@@ -13,6 +15,11 @@ describe("HTTP (createApp)", () => {
     vi.restoreAllMocks();
     if (prevKey === undefined) delete process.env.SOLI_DM_API_KEY;
     else process.env.SOLI_DM_API_KEY = prevKey;
+    if (prevCors === undefined) delete process.env.CORS_ORIGIN;
+    else process.env.CORS_ORIGIN = prevCors;
+    if (prevVercelPreview === undefined)
+      delete process.env.CORS_ALLOW_VERCEL_PREVIEW;
+    else process.env.CORS_ALLOW_VERCEL_PREVIEW = prevVercelPreview;
   });
 
   it("GET /health returns ok without API key", async () => {
@@ -70,5 +77,34 @@ describe("HTTP (createApp)", () => {
     expect(ok.body.data.rolls).toHaveLength(2);
     expect(ok.body.data.total).toBeGreaterThanOrEqual(2);
     expect(ok.body.data.total).toBeLessThanOrEqual(12);
+  });
+
+  it("OPTIONS preflight /api/campaigns consente origine in CORS_ORIGIN", async () => {
+    delete process.env.SOLI_DM_API_KEY;
+    process.env.CORS_ORIGIN = "https://soli-dm-fe.vercel.app";
+    process.env.CORS_ALLOW_VERCEL_PREVIEW = "true";
+    const app = createApp();
+    const res = await request(app)
+      .options("/api/campaigns")
+      .set("Origin", "https://soli-dm-fe.vercel.app")
+      .set("Access-Control-Request-Method", "GET");
+    expect(res.status).toBe(204);
+    expect(res.headers["access-control-allow-origin"]).toBe(
+      "https://soli-dm-fe.vercel.app"
+    );
+  });
+
+  it("OPTIONS preflight non richiede API key (anche se SOLI_DM_API_KEY attiva)", async () => {
+    process.env.SOLI_DM_API_KEY = "test-key-123";
+    process.env.CORS_ORIGIN = "https://soli-dm-fe.vercel.app";
+    const app = createApp();
+    const res = await request(app)
+      .options("/api/campaigns")
+      .set("Origin", "https://soli-dm-fe.vercel.app")
+      .set("Access-Control-Request-Method", "GET");
+    expect(res.status).toBe(204);
+    expect(res.headers["access-control-allow-origin"]).toBe(
+      "https://soli-dm-fe.vercel.app"
+    );
   });
 });

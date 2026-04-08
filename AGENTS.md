@@ -1,6 +1,6 @@
 # AGENTS.md — Soli Dungeon Master Backend
 
-**Aggiornato:** 2026-04-02
+**Aggiornato:** 2026-04-08
 
 ## Progetto
 
@@ -8,7 +8,7 @@ API **Express 4** + **TypeScript**, persistenza **Supabase** (client service rol
 
 ## Comandi
 
-`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`**
+`npm run dev` · `npm run build` · `npm start` · `npm run type-check` · **`npm test`** · **`npm run test:watch`** · **`npm run smoke:cors`** (preflight OPTIONS reale verso `SMOKE_API_URL` / `SMOKE_ORIGIN`)
 
 Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 
@@ -17,7 +17,8 @@ Prima di una PR: `npm run type-check`, **`npm test`**, `npm run build`.
 - **Vitest** (`vitest.config.ts`), setup env fittizi in **`vitest.setup.ts`** (`SUPABASE_URL` / `SUPABASE_SERVICE_KEY`) così `@supabase/supabase-js` si inizializza al caricamento delle route senza progetto reale.
 - **`src/lib/diceRoll.test.ts`**: notazione `NdX`, limiti, RNG iniettato.
 - **`src/middleware/apiKey.test.ts`**: `SOLI_DM_API_KEY` opzionale, header `x-soli-dm-api-key` / `Bearer`.
-- **`src/http.integration.test.ts`**: `GET /health`, `GET /api/classes`, API key, ordine route `GET /api/rules/ability-scores/list`, `POST /api/dice/roll`.
+- **`src/http.integration.test.ts`**: `GET /health`, `GET /api/classes`, API key, `OPTIONS` CORS preflight, ordine route `GET /api/rules/ability-scores/list`, `POST /api/dice/roll`.
+- **`src/lib/corsConfig.test.ts`**: allowlist, preview Vercel, virgolette in env.
 
 I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
@@ -30,9 +31,9 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 | Variabile | Ruolo |
 |-----------|--------|
 | `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | Client server-side (mai esporre la service key al browser). |
-| `CORS_ORIGIN` | Una o più origini (virgola). Se valorizzata, solo quelle + opzionale preview Vercel; se vuota, `origin: true`. |
+| `CORS_ORIGIN` | Una o più origini (virgola). Se valorizzata, solo quelle + opzionale preview Vercel; se vuota, `origin: true`. Valori tra virgolette in dashboard vengono normalizzati. |
 | `CORS_ALLOW_VERCEL_PREVIEW` | `true` / `1` / `yes`: consente anche `https://*.vercel.app` il cui host contiene `CORS_VERCEL_PREVIEW_SUBSTRING` (default `soli-dm`) — utile per deploy preview ≠ `soli-dm-fe.vercel.app`. |
-| `SOLI_DM_API_KEY` | Se valorizzata, tutte le route `/api/*` richiedono la chiave; **`GET /health`** resta pubblico. |
+| `SOLI_DM_API_KEY` | Se valorizzata, le route `/api/*` richiedono la chiave (**non** le richieste **OPTIONS**); **`GET /health`** resta pubblico. |
 | `PORT` | Default `5000` in locale; su **Render** usa di solito la variabile `PORT` fornita dalla piattaforma (non forzare `5000` negli env se crea conflitti). |
 
 ## Regole per l’agente

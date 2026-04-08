@@ -74,8 +74,18 @@ Verifica che il server sia online. **Non richiede API key** anche se `SOLI_DM_AP
 
 ### Sicurezza opzionale
 
-- **`CORS_ORIGIN`**: una o più origini (virgola). Se valorizzata, CORS le accetta; con **`CORS_ALLOW_VERCEL_PREVIEW=true`** anche le preview Vercel `https://*.vercel.app` il cui host contiene `soli-dm`. Se vuota: `origin: true` (sviluppo).
-- **`SOLI_DM_API_KEY`**: se impostata, tutte le route sotto `/api/*` richiedono header `x-soli-dm-api-key` o `Authorization: Bearer <chiave>`. Utile in produzione davanti a un frontend che condivide la chiave (meglio: BFF che aggiunge l’header lato server).
+- **`CORS_ORIGIN`**: una o più origini (virgola). Se valorizzata, solo quelle origini (normalizzate) sono accettate; con **`CORS_ALLOW_VERCEL_PREVIEW=true`** anche le preview Vercel `https://*.vercel.app` il cui host contiene `soli-dm`. Se vuota: `origin: true` (sviluppo). In avvio il server logga `[cors] allowlist …` per verifica su Render.
+- **`SOLI_DM_API_KEY`**: se impostata, le richieste sotto `/api/*` (tranne **OPTIONS** preflight) richiedono `x-soli-dm-api-key` o `Authorization: Bearer <chiave>`. Meglio un BFF che aggiunge l’header lato server.
+
+**Verifica CORS contro produzione** (nessun segreto):
+
+```bash
+npm run smoke:cors
+# oppure
+SMOKE_API_URL=https://soli-dm-be.onrender.com SMOKE_ORIGIN=https://soli-dm-fe.vercel.app npm run smoke:cors
+```
+
+Su GitHub: workflow **CORS smoke (production)** (solo `workflow_dispatch`). Se fallisce, allinea `CORS_ORIGIN` / `CORS_ALLOW_VERCEL_PREVIEW` sulla dashboard Render. Dettaglio in **SETUP.md** (Troubleshooting CORS).
 
 ---
 

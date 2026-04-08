@@ -10,7 +10,8 @@
     "start": "node scripts/start.cjs",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke:cors": "node scripts/cors-smoke.mjs"
   },
   "keywords": [
     "dnd",

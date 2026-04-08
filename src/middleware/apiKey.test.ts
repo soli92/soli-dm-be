@@ -85,4 +85,17 @@ describe("requireApiKeyWhenConfigured", () => {
     );
     expect(called).toBe(true);
   });
+
+  it("skips API key for OPTIONS (CORS preflight)", () => {
+    process.env.SOLI_DM_API_KEY = "secret";
+    let called = false;
+    requireApiKeyWhenConfigured(
+      { method: "OPTIONS", headers: {} } as Request,
+      mockRes(),
+      () => {
+        called = true;
+      }
+    );
+    expect(called).toBe(true);
+  });
 });

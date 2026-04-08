@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
 import { createApp } from "./createApp";
+import { logCorsStartup } from "./lib/corsConfig";
 
 dotenv.config();
+logCorsStartup();
 
 const app = createApp();
 const PORT = process.env.PORT || 5000;
