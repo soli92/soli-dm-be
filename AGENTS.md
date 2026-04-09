@@ -50,14 +50,15 @@ Nuove route che usano Supabase: aggiungere casi in un `*.integration.test.ts` es
 - **`src/http.integration.test.ts`**: health, campagne lista vuota (mock default), classi, API key, CORS preflight, `rules/ability-scores/list`, `POST /api/dice/roll`.
 - **`src/wiki.integration.test.ts`**: wiki (classi, razze, divinità, regole).
 - **`src/api.routes.integration.test.ts`**: 404, `dice/roll-multiple`, `dice/history` senza `campaign_id`, API key su `/api/races`.
-- **`src/campaigns-characters.integration.test.ts`**: CRUD campagne e personaggi + errori Supabase + API key.
+- **`src/campaigns-characters.integration.test.ts`**: CRUD campagne e personaggi + errori Supabase + API key; personaggi con normalizzazione `name` / `character_name` (vedi `src/routes/characters.ts`).
+- **`src/api-insert.integration.test.ts`**: inserimenti `POST` campagna/personaggio via HTTP (supertest), flusso sequenziale campagna → personaggio.
 - **`src/dice.integration.test.ts`**: `POST /roll` con persistenza, `GET /history`, `GET /history/:id`.
 
 I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
 ## File utili
 
-`README.md` · **`SETUP.md`** (deploy Render, SQL incluso `wiki_srd_cache`, § sync wiki) · `.env.example` · **`render.yaml`** · **`scripts/start.cjs`** · `src/createApp.ts` · **`src/lib/tipologiche.ts`** (default campagna/personaggio, allineamenti) · `src/lib/wikiSrd/*` · `src/scripts/syncWikiSrd.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
+`README.md` · **`SETUP.md`** (deploy Render, SQL incluso `wiki_srd_cache`, § sync wiki, DDL `characters` con `name` + `character_name`) · `.env.example` · **`render.yaml`** · **`scripts/start.cjs`** · `src/createApp.ts` · **`src/routes/characters.ts`** (insert/update allinea `name` e `character_name`; risposte JSON normalizzate) · **`src/lib/tipologiche.ts`** (default campagna/personaggio, allineamenti) · `src/lib/wikiSrd/*` · `src/scripts/syncWikiSrd.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
 
 ## Variabili d’ambiente (sintesi)
 

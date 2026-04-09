@@ -285,7 +285,8 @@ updated_at  TIMESTAMP
 id            UUID (PK)
 campaign_id   UUID (FK → campaigns)
 player_name   VARCHAR(255)
-character_name VARCHAR(255)
+name          VARCHAR(255)   -- spesso NOT NULL in Postgres; l’API la valorizza come il nome personaggio
+character_name VARCHAR(255)  -- allineata a `name` in POST/PUT (contratto client)
 class_name    VARCHAR(50)
 race          VARCHAR(50)
 level         INTEGER (1-20)

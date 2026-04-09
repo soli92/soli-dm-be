@@ -34,6 +34,7 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
   const sampleCharacter = {
     id: "22222222-2222-2222-2222-222222222222",
     campaign_id: sampleCampaign.id,
+    name: "Bruenor",
     character_name: "Bruenor",
     class_name: "Fighter",
     race: "Dwarf",
@@ -166,6 +167,21 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
         .expect(200);
       expect(res.body.success).toBe(true);
     });
+
+    it("espone character_name se il DB restituisce solo name (normalizzazione API)", async () => {
+      const rowDbOnlyName = {
+        id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        campaign_id: sampleCampaign.id,
+        name: "LegacyNome",
+        class_name: "Bard",
+        race: "Elf",
+        level: 1,
+      };
+      mockDb.setFallback(dbList([rowDbOnlyName]));
+      const res = await request(app()).get("/api/characters").expect(200);
+      expect(res.body.data[0].character_name).toBe("LegacyNome");
+      expect(res.body.data[0].name).toBe("LegacyNome");
+    });
   });
 
   describe("GET /api/characters/:id", () => {
@@ -197,6 +213,7 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
       const created = {
         ...sampleCharacter,
         id: "44444444-4444-4444-4444-444444444444",
+        name: "Catti",
         character_name: "Catti",
         class_name: "Rogue",
         race: "Halfling",
@@ -212,6 +229,8 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
         })
         .expect(201);
       expect(res.body.data.class_name).toBe("Rogue");
+      expect(res.body.data.name).toBe("Catti");
+      expect(res.body.data.character_name).toBe("Catti");
     });
   });
 

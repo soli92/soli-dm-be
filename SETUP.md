@@ -131,10 +131,12 @@ CREATE TABLE campaigns (
 );
 
 -- Characters
+-- `name` e `character_name`: l'API imposta entrambi allo stesso valore (schema Supabase/Postgres con `name` NOT NULL).
 CREATE TABLE characters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
   player_name VARCHAR(255),
+  name VARCHAR(255) NOT NULL,
   character_name VARCHAR(255) NOT NULL,
   class_name VARCHAR(50),
   race VARCHAR(50),
@@ -210,6 +212,16 @@ CREATE TABLE wiki_srd_cache (
 );
 CREATE INDEX IF NOT EXISTS wiki_srd_cache_resource_name_idx ON wiki_srd_cache (resource_type, name);
 ```
+
+Se la tabella **`characters`** esiste già **senza** la colonna `name` (solo `character_name`), aggiungila e allinea i valori prima di impostare NOT NULL:
+
+```sql
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS name VARCHAR(255);
+UPDATE characters SET name = character_name WHERE name IS NULL OR trim(name) = '';
+ALTER TABLE characters ALTER COLUMN name SET NOT NULL;
+```
+
+Se invece hai solo `name` e manca `character_name`, fai il percorso inverso (`ADD` `character_name`, `UPDATE` da `name`, `SET NOT NULL`).
 
 Se le tabelle non esistono, creale manualmente su Supabase:
 1. Supabase Dashboard → **SQL Editor**

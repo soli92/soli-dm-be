@@ -7,6 +7,27 @@ import {
 
 const router = Router();
 
+type CharacterRow = Record<string, unknown>;
+
+/**
+ * In Postgres/Supabase spesso esiste `name` NOT NULL; il client API usa `character_name`.
+ * Allineiamo entrambe in scrittura e nelle risposte JSON.
+ */
+function displayNameFromRow(row: CharacterRow): string {
+  const cn = row.character_name;
+  const n = row.name;
+  if (typeof cn === "string" && cn.trim() !== "") return cn.trim();
+  if (typeof n === "string" && n.trim() !== "") return n.trim();
+  return "";
+}
+
+function normalizeCharacter(row: CharacterRow | null | undefined): CharacterRow {
+  if (row == null || typeof row !== "object") return {};
+  const display = displayNameFromRow(row);
+  if (!display) return { ...row };
+  return { ...row, character_name: display, name: display };
+}
+
 /**
  * GET /api/characters
  * Lista tutti i personaggi
@@ -27,10 +48,11 @@ router.get("/", async (req: Request, res: Response) => {
 
     if (error) throw error;
 
+    const rows = (data || []) as CharacterRow[];
     res.json({
       success: true,
-      data: data || [],
-      count: data?.length || 0,
+      data: rows.map((r) => normalizeCharacter(r)),
+      count: rows.length,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -56,7 +78,7 @@ router.get("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Character not found" });
     }
 
-    res.json({ success: true, data });
+    res.json({ success: true, data: normalizeCharacter(data as CharacterRow) });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -81,10 +103,12 @@ router.post("/", async (req: Request, res: Response) => {
       stats,
     } = req.body;
 
-    if (!campaign_id || !character_name || !class_name || !race) {
+    const trimmedName = String(character_name).trim();
+
+    if (!campaign_id || !trimmedName || !class_name || !race) {
       return res.status(400).json({
         error:
-          "campaign_id, character_name, class_name, and race are required",
+          "Servono campagna (campaign_id), nome personaggio, classe e razza.",
       });
     }
 
@@ -94,7 +118,9 @@ router.post("/", async (req: Request, res: Response) => {
         {
           campaign_id,
           player_name: player_name || null,
-          character_name,
+          /** Colonna `name` richiesta da molti schema Postgres NOT NULL */
+          name: trimmedName,
+          character_name: trimmedName,
           class_name,
           race,
           level: level || 1,
@@ -116,7 +142,11 @@ router.post("/", async (req: Request, res: Response) => {
 
     if (error) throw error;
 
-    res.status(201).json({ success: true, data: data?.[0] });
+    const created = data?.[0] as CharacterRow | undefined;
+    res.status(201).json({
+      success: true,
+      data: created ? normalizeCharacter(created) : created,
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -129,7 +159,17 @@ router.post("/", async (req: Request, res: Response) => {
 router.put("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates: Record<string, unknown> = { ...req.body };
+
+    if (updates.character_name != null) {
+      const t = String(updates.character_name).trim();
+      updates.character_name = t;
+      updates.name = t;
+    } else if (updates.name != null) {
+      const t = String(updates.name).trim();
+      updates.name = t;
+      updates.character_name = t;
+    }
 
     const { data, error } = await supabase
       .from("characters")
@@ -142,7 +182,10 @@ router.put("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Character not found" });
     }
 
-    res.json({ success: true, data: data[0] });
+    res.json({
+      success: true,
+      data: normalizeCharacter(data[0] as CharacterRow),
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
