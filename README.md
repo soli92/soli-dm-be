@@ -15,6 +15,7 @@ Questo repository contiene il **Backend API** costruito con **Node.js + Express 
   - Classi SRD (12) e razze SRD (9) quando la cache è allineata a [dnd5eapi.co](https://www.dnd5eapi.co/) (dataset 2014); fallback statico include anche razze extra non in SRD.
   - 20+ Divinità (pantheon stile Forgotten Realms, dati statici)
   - Regole core in categorie curate (Ability Scores, Combat, … — statiche)
+- **📑 Tipologiche** — `src/lib/tipologiche.ts`: allineamenti PHB (9), stati e default per campagne/personaggi (`isKnownAlignment` per validazioni). Il frontend replica le liste in `soli-dm-fe/lib/tipologiche/`: **aggiornare entrambi** quando cambiano valori condivisi (vedi commento in cima al modulo backend).
 
 ---
 
@@ -362,6 +363,7 @@ src/
 │   └── wikiRacesStatic.ts    # Fallback wiki razze se DB vuoto
 ├── lib/
 │   ├── supabase.ts    # Client Supabase (service role)
+│   ├── tipologiche.ts # Allineamenti, stati, default campagna/personaggio
 │   ├── diceRoll.ts    # Logica pura notazione NdX (testata)
 │   └── wikiSrd/       # Client dnd5eapi, mapper, lettura cache Supabase
 ├── scripts/
@@ -380,7 +382,7 @@ dist/                  # Generato da `npm run build` (gitignored)
 render.yaml            # Opzionale: Blueprint Render (build, start, NODE_VERSION)
 ```
 
-File di test Vitest: `src/lib/diceRoll.test.ts`, `src/middleware/apiKey.test.ts`, `src/http.integration.test.ts`; setup env in `vitest.setup.ts`. Deploy dettagliato: **`SETUP.md`**.
+File di test Vitest: `src/lib/diceRoll.test.ts`, `src/lib/tipologiche.test.ts`, `src/lib/corsConfig.test.ts`, `src/middleware/apiKey.test.ts`, `src/http.integration.test.ts`, `src/wiki.integration.test.ts`, `src/api.routes.integration.test.ts`, `src/campaigns-characters.integration.test.ts`, `src/dice.integration.test.ts`; setup env in `vitest.setup.ts`. Deploy dettagliato: **`SETUP.md`**.
 
 ---
 

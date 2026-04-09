@@ -1,6 +1,6 @@
 # AGENTS.md — Soli Dungeon Master Backend
 
-**Aggiornato:** 2026-04-08
+**Aggiornato:** 2026-04-09
 
 ## Progetto
 
@@ -44,6 +44,7 @@ Nuove route che usano Supabase: aggiungere casi in un `*.integration.test.ts` es
 ### File test
 
 - **`src/lib/diceRoll.test.ts`**: notazione `NdX`, limiti, RNG iniettato.
+- **`src/lib/tipologiche.test.ts`**: allineamenti D&D e helper `isKnownAlignment`.
 - **`src/middleware/apiKey.test.ts`**: `SOLI_DM_API_KEY`, header `x-soli-dm-api-key` / `Bearer`.
 - **`src/lib/corsConfig.test.ts`**: allowlist CORS, preview Vercel, virgolette in env.
 - **`src/http.integration.test.ts`**: health, campagne lista vuota (mock default), classi, API key, CORS preflight, `rules/ability-scores/list`, `POST /api/dice/roll`.
@@ -56,7 +57,7 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 
 ## File utili
 
-`README.md` · **`SETUP.md`** (deploy Render, SQL incluso `wiki_srd_cache`, § sync wiki) · `.env.example` · **`render.yaml`** · **`scripts/start.cjs`** · `src/createApp.ts` · `src/lib/wikiSrd/*` · `src/scripts/syncWikiSrd.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
+`README.md` · **`SETUP.md`** (deploy Render, SQL incluso `wiki_srd_cache`, § sync wiki) · `.env.example` · **`render.yaml`** · **`scripts/start.cjs`** · `src/createApp.ts` · **`src/lib/tipologiche.ts`** (default campagna/personaggio, allineamenti) · `src/lib/wikiSrd/*` · `src/scripts/syncWikiSrd.ts` · `src/lib/diceRoll.ts` · `src/middleware/apiKey.ts`
 
 ## Variabili d’ambiente (sintesi)
 

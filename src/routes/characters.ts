@@ -1,5 +1,9 @@
 import { Router, Request, Response } from "express";
 import { supabase } from "../lib/supabase";
+import {
+  DEFAULT_CHARACTER_ALIGNMENT,
+  DEFAULT_CHARACTER_STATUS,
+} from "../lib/tipologiche";
 
 const router = Router();
 
@@ -95,7 +99,7 @@ router.post("/", async (req: Request, res: Response) => {
           race,
           level: level || 1,
           experience: experience || 0,
-          alignment: alignment || "Neutral",
+          alignment: alignment || DEFAULT_CHARACTER_ALIGNMENT,
           background: background || null,
           stats: stats || {
             strength: 10,
@@ -105,7 +109,7 @@ router.post("/", async (req: Request, res: Response) => {
             wisdom: 10,
             charisma: 10,
           },
-          status: "active",
+          status: DEFAULT_CHARACTER_STATUS,
         },
       ])
       .select();

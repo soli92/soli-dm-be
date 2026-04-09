@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { supabase } from "../lib/supabase";
+import { DEFAULT_CAMPAIGN_STATUS } from "../lib/tipologiche";
 
 const router = Router();
 
@@ -74,7 +75,7 @@ router.post("/", async (req: Request, res: Response) => {
           dm_name,
           world_setting: world_setting || null,
           level_range: level_range || "1-20",
-          status: "active",
+          status: DEFAULT_CAMPAIGN_STATUS,
         },
       ])
       .select();
