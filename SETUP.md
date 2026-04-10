@@ -144,6 +144,7 @@ CREATE TABLE characters (
   alignment VARCHAR(50),
   background TEXT,
   stats JSONB DEFAULT '{}',
+  sheet_data JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -188,12 +189,12 @@ CREATE TABLE dnd_rules (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Dice Rolls History
+-- Dice Rolls History (API scrive `dice_notation`)
 CREATE TABLE dice_rolls (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID REFERENCES campaigns(id) ON DELETE SET NULL,
   character_id UUID REFERENCES characters(id) ON DELETE SET NULL,
-  notation VARCHAR(20),
+  dice_notation VARCHAR(20) NOT NULL,
   result_total INT,
   result_rolls INT[],
   created_at TIMESTAMP DEFAULT NOW()
@@ -211,6 +212,14 @@ CREATE TABLE wiki_srd_cache (
   UNIQUE (resource_type, index_slug)
 );
 CREATE INDEX IF NOT EXISTS wiki_srd_cache_resource_name_idx ON wiki_srd_cache (resource_type, name);
+```
+
+Script SQL riutilizzabile (scheda personaggio, campi opzionali, note per `dice_rolls`): vedi **[`scripts/supabase-alignment.sql`](./scripts/supabase-alignment.sql)**.
+
+Se la tabella **`characters`** esiste già **senza** la colonna `sheet_data` (scheda estesa: sottoclasse, armamenti, sessioni, ecc.):
+
+```sql
+ALTER TABLE characters ADD COLUMN IF NOT EXISTS sheet_data JSONB DEFAULT '{}'::jsonb;
 ```
 
 Se la tabella **`characters`** esiste già **senza** la colonna `name` (solo `character_name`), aggiungila e allinea i valori prima di impostare NOT NULL:

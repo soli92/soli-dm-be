@@ -27,7 +27,7 @@ router.post("/roll", async (req: Request, res: Response) => {
         {
           campaign_id,
           character_id: character_id || null,
-          notation,
+          dice_notation: notation,
           result_total: result.total,
           result_rolls: result.rolls,
         },

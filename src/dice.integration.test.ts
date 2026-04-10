@@ -24,7 +24,7 @@ describe("Dice API + Supabase (mock globale)", () => {
     id: "55555555-5555-5555-5555-555555555555",
     campaign_id: "11111111-1111-1111-1111-111111111111",
     character_id: null,
-    notation: "2d6",
+    dice_notation: "2d6",
     result_total: 7,
     result_rolls: [3, 4],
     created_at: "2024-01-03T00:00:00Z",
@@ -65,7 +65,7 @@ describe("Dice API + Supabase (mock globale)", () => {
         .query({ campaign_id: rollRow.campaign_id })
         .expect(200);
       expect(res.body.count).toBe(1);
-      expect(res.body.data[0].notation).toBe("2d6");
+      expect(res.body.data[0].dice_notation).toBe("2d6");
     });
 
     it("500 se Supabase errore", async () => {

@@ -294,6 +294,7 @@ experience    INTEGER
 alignment     VARCHAR(50)
 background    TEXT
 stats         JSONB (strength, dexterity, etc.)
+sheet_data    JSONB (scheda estesa: sottoclasse, armamenti, sessioni, …)
 status        VARCHAR(50)
 created_at    TIMESTAMP
 updated_at    TIMESTAMP
@@ -304,7 +305,7 @@ updated_at    TIMESTAMP
 id            UUID (PK)
 campaign_id   UUID (FK → campaigns)
 character_id  UUID (FK → characters, nullable)
-notation      VARCHAR(20) (e.g., "4d6")
+dice_notation VARCHAR(20) NOT NULL (e.g., "4d6") — nome colonna atteso dall’API
 result_total  INTEGER
 result_rolls  INTEGER[] (array of individual rolls)
 created_at    TIMESTAMP

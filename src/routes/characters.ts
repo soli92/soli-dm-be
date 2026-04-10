@@ -101,6 +101,7 @@ router.post("/", async (req: Request, res: Response) => {
       alignment,
       background,
       stats,
+      sheet_data,
     } = req.body;
 
     const trimmedName = String(character_name).trim();
@@ -135,6 +136,10 @@ router.post("/", async (req: Request, res: Response) => {
             wisdom: 10,
             charisma: 10,
           },
+          sheet_data:
+            sheet_data != null && typeof sheet_data === "object"
+              ? sheet_data
+              : {},
           status: DEFAULT_CHARACTER_STATUS,
         },
       ])

@@ -232,6 +232,36 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
       expect(res.body.data.name).toBe("Catti");
       expect(res.body.data.character_name).toBe("Catti");
     });
+
+    it("201 creazione con sheet_data JSON", async () => {
+      const sheet = {
+        subclass: "Thief",
+        armaments: "Rapier",
+        sessions: [{ id: "s1", title: "Sessione 1", notes: "Intro" }],
+      };
+      const created = {
+        ...sampleCharacter,
+        id: "66666666-6666-6666-6666-666666666666",
+        name: "Nott",
+        character_name: "Nott",
+        class_name: "Rogue",
+        race: "Goblin",
+        sheet_data: sheet,
+      };
+      mockDb.setFallback(dbList([created]));
+      const res = await request(app())
+        .post("/api/characters")
+        .send({
+          campaign_id: sampleCampaign.id,
+          character_name: "Nott",
+          class_name: "Rogue",
+          race: "Goblin",
+          sheet_data: sheet,
+        })
+        .expect(201);
+      expect(res.body.data.sheet_data?.subclass).toBe("Thief");
+      expect(res.body.data.sheet_data?.sessions).toHaveLength(1);
+    });
   });
 
   describe("PUT /api/characters/:id", () => {
@@ -243,6 +273,21 @@ describe("Campaigns & characters API (Supabase mocked globally)", () => {
         .send({ level: 5 })
         .expect(200);
       expect(res.body.data.level).toBe(5);
+    });
+
+    it("200 update con sheet_data", async () => {
+      const updated = {
+        ...sampleCharacter,
+        sheet_data: { deposit: "Gemma", bonuses_penalties: "+2 stealth" },
+      };
+      mockDb.setFallback(dbList([updated]));
+      const res = await request(app())
+        .put(`/api/characters/${sampleCharacter.id}`)
+        .send({
+          sheet_data: updated.sheet_data,
+        })
+        .expect(200);
+      expect(res.body.data.sheet_data?.deposit).toBe("Gemma");
     });
 
     it("404", async () => {
