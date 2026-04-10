@@ -150,6 +150,8 @@ curl -X POST http://localhost:5000/api/characters \
   }'
 ```
 
+Il body REST usa **`class_name`** (contratto client). In scrittura l’API valorizza anche la colonna Postgres **`class`** con lo stesso valore, perché alcuni schema Supabase hanno **`class` NOT NULL** separata da `class_name`. Se compare un errore su una colonna mancante, vedi **`scripts/supabase-alignment.sql`** (blocco 2b) e **SETUP.md** (DDL `characters`).
+
 ---
 
 ### 🎲 Dadi (Dice Roller)
@@ -287,7 +289,8 @@ campaign_id   UUID (FK → campaigns)
 player_name   VARCHAR(255)
 name          VARCHAR(255)   -- spesso NOT NULL in Postgres; l’API la valorizza come il nome personaggio
 character_name VARCHAR(255)  -- allineata a `name` in POST/PUT (contratto client)
-class_name    VARCHAR(50)
+class         VARCHAR(50)    -- in Postgres spesso quotata come "class" NOT NULL (schema legacy)
+class_name    VARCHAR(50)    -- contratto JSON; POST/PUT impostano `class` e `class_name` allo stesso valore
 race          VARCHAR(50)
 level         INTEGER (1-20)
 experience    INTEGER

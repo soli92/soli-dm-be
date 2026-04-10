@@ -21,11 +21,29 @@ function displayNameFromRow(row: CharacterRow): string {
   return "";
 }
 
+/** Alcuni schema Postgres/Supabase usano la colonna `class` (NOT NULL) invece o oltre a `class_name`. */
+function classDisplayFromRow(row: CharacterRow): string {
+  const cn = row.class_name;
+  const c = row.class;
+  if (typeof cn === "string" && cn.trim() !== "") return cn.trim();
+  if (typeof c === "string" && c.trim() !== "") return c.trim();
+  return "";
+}
+
 function normalizeCharacter(row: CharacterRow | null | undefined): CharacterRow {
   if (row == null || typeof row !== "object") return {};
   const display = displayNameFromRow(row);
-  if (!display) return { ...row };
-  return { ...row, character_name: display, name: display };
+  const cls = classDisplayFromRow(row);
+  const out: CharacterRow = { ...row };
+  if (display) {
+    out.character_name = display;
+    out.name = display;
+  }
+  if (cls) {
+    out.class_name = cls;
+    out.class = cls;
+  }
+  return out;
 }
 
 /**
@@ -106,7 +124,8 @@ router.post("/", async (req: Request, res: Response) => {
 
     const trimmedName = String(character_name).trim();
 
-    if (!campaign_id || !trimmedName || !class_name || !race) {
+    const classValue = String(class_name ?? "").trim();
+    if (!campaign_id || !trimmedName || !classValue || !race) {
       return res.status(400).json({
         error:
           "Servono campagna (campaign_id), nome personaggio, classe e razza.",
@@ -122,7 +141,9 @@ router.post("/", async (req: Request, res: Response) => {
           /** Colonna `name` richiesta da molti schema Postgres NOT NULL */
           name: trimmedName,
           character_name: trimmedName,
-          class_name,
+          class_name: classValue,
+          /** Schema legacy: colonna `class` NOT NULL separata da `class_name` */
+          class: classValue,
           race,
           level: level || 1,
           experience: experience || 0,
@@ -174,6 +195,20 @@ router.put("/:id", async (req: Request, res: Response) => {
       const t = String(updates.name).trim();
       updates.name = t;
       updates.character_name = t;
+    }
+
+    if (updates.class_name !== undefined) {
+      const v =
+        updates.class_name == null
+          ? null
+          : String(updates.class_name).trim();
+      updates.class_name = v;
+      updates.class = v;
+    } else if (updates.class !== undefined) {
+      const v =
+        updates.class == null ? null : String(updates.class).trim();
+      updates.class = v;
+      updates.class_name = v;
     }
 
     const { data, error } = await supabase

@@ -17,6 +17,22 @@ ALTER TABLE public.characters
   ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';
 
 -- ---------------------------------------------------------------------------
+-- 2b) Personaggi: `class` NOT NULL vs `class_name` (API invia entrambe)
+--     L’errore «null value in column "class"» indica che manca il valore nella
+--     colonna legacy `class` mentre l’insert popola solo `class_name`.
+-- ---------------------------------------------------------------------------
+-- Solo class_name (aggiungi class e allinea):
+-- ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS "class" VARCHAR(50);
+-- UPDATE public.characters SET "class" = class_name
+--   WHERE "class" IS NULL AND class_name IS NOT NULL AND trim(class_name) <> '';
+-- ALTER TABLE public.characters ALTER COLUMN "class" SET NOT NULL;  -- solo se nessun NULL resta
+
+-- Solo "class" (aggiungi class_name e allinea):
+-- ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS class_name VARCHAR(50);
+-- UPDATE public.characters SET class_name = "class"
+--   WHERE (class_name IS NULL OR trim(class_name) = '') AND "class" IS NOT NULL;
+
+-- ---------------------------------------------------------------------------
 -- 3) Personaggi: colonna name (NOT NULL) se esiste solo character_name
 -- ---------------------------------------------------------------------------
 -- ALTER TABLE public.characters ADD COLUMN IF NOT EXISTS name VARCHAR(255);
