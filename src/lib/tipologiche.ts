@@ -1,6 +1,7 @@
 /**
  * Tipologiche di dominio (default e insiemi per validazione futura).
- * Allineare elenchi al frontend `soli-dm-fe/lib/tipologiche/dnd.ts` quando si cambiano i valori.
+ * Allineare elenchi al frontend `soli-dm-fe/lib/tipologiche/dnd.ts` quando si cambiano i valori
+ * (es. `PLAYBOOK_CLASS_NAMES` per i form personaggio, oltre alle 12 `SRD_CLASS_NAMES`).
  */
 
 export const DND_ALIGNMENTS = [
