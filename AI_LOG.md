@@ -8,7 +8,7 @@ Memoria di sviluppo AI-assisted. Annotazioni sui prompt, decisioni e pattern eme
 
 Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, personaggi, dadi, wiki D&D (anche cache SRD su Supabase), integrazione **dnd5eapi**, deploy su **Render**, test **Vitest** + supertest, CORS multi-origine e preview Vercel.
 
-**Stack AI usato (inferito)**: assistenza IDE/LLM (commit numerosi “Add/fix” in sequenza su Render/TypeScript); **nessun merge `cursor/`** esplicito nella history estratta — confidenza **media**.
+**Stack AI usato (inferito; aggiornato 2026-04-22)**: assistenza **IDE/LLM probabile** (serie “Add/fix” su Render/TS). `AGENTS.md` orientato a **agenti futuri** (`1d07835`). `.cursor/rules/agents-context.mdc` se presente segue ecosistema soli92. Nessun SDK LLM nel backend DM.
 
 **Periodo di sviluppo**: 2026-04-02 (`971746d` Initial commit) → 2026-04-09 (`8b447ad` fix characters Postgres NOT NULL).
 
@@ -33,9 +33,14 @@ Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, pers
 - **Express** monolite con route modulari.
 - **Supabase** come client dati.
 
-**Prompt chiave usati**: > [TODO da compilare manualmente]
+**Prompt chiave usati**
 
-**Lezioni apprese**: > [TODO da compilare manualmente]
+> **Prompt [inferito]**: "Genera API Express TypeScript per campagne, personaggi, dadi, wiki D&D con endpoint numerati (classi, razze, divinità) e README."
+> *Evidenza*: raffica `feat: add D&D …` (`ff0f793`…`718275f`), `971746d`–`bd5f516`.
+
+**Lezioni apprese**
+
+- **Monolite Express** con molte route statiche wiki richiede attenzione all’**ordine** dichiarazione route (`AGENTS.md` regole).
 
 ### Fase 2 — Deploy Render: build TypeScript, CommonJS, yaml iterativo
 
@@ -52,9 +57,15 @@ Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, pers
 - **CommonJS** per compatibilità runtime Render (`bfc7710`).
 - Uso di `scripts/start.cjs` e risalita path a `dist/server.js` (`4482f2e`, `6b8623c`).
 
-**Prompt chiave usati**: > [TODO da compilare manualmente]
+**Prompt chiave usati**
 
-**Lezioni apprese**: > [TODO da compilare manualmente]
+> **Prompt [inferito]**: "Risolvi build TypeScript su Render: commonjs, postinstall, render.yaml, Procfile, path dist/server.js."
+> *Evidenza*: `bfc7710`, `572f1b7`, `6b8623c`, molti commit `fix:` deploy.
+
+**Lezioni apprese**
+
+- **CommonJS** scelto per compatibilità runtime provider rispetto a ESM puro (`bfc7710`).
+- **`dist/` in .gitignore** implica build obbligatoria in ogni deploy (`AGENTS.md` Deploy).
 
 ### Fase 3 — AGENTS, test harness, CORS, wiki cache, tipologiche
 
@@ -72,9 +83,15 @@ Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, pers
 - **CORS_ALLOW_VERCEL_PREVIEW** e normalizzazione `CORS_ORIGIN` (`8ec0c88`, `785ccaf`).
 - Test di smoke API (`4f56270`).
 
-**Prompt chiave usati**: > [TODO da compilare manualmente]
+**Prompt chiave usati**
 
-**Lezioni apprese**: > [TODO da compilare manualmente]
+> **Prompt [inferito]**: "Aggiungi Vitest/supertest, mock Supabase, fix CORS deny callback cors@2.x, cache wiki SRD, tipologiche dominio, allinea colonne personaggi Postgres NOT NULL."
+> *Evidenza*: `1d07835`, `e0efe26`, `2b609b1`, `d0529d7`, `8b447ad`.
+
+**Lezioni apprese**
+
+- In **cors@2.x**, `callback(null, false)` non nega correttamente → va lanciato `Error` esplicito (`e0efe26`).
+- **Colonne duplicate** `name` / `character_name` richiedono allineamento insert/update per NOT NULL (`8b447ad`).
 
 ---
 
@@ -121,10 +138,29 @@ Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, pers
 
 ## Punti aperti / note per il futuro
 
-> [TODO da compilare manualmente: performance wiki, rate limit API esterne, backup dati campagne]
+- **grep `TODO|FIXME|HACK|XXX`** in `src/`: nessun match prioritario in questa passata.
+- **Schema personaggi**: evoluzioni successive (`class`, `class_name`, `sheet_data` in `AGENTS.md` post-merge upstream) — verificare allineamento con migrazioni Prisma e script `scripts/supabase-alignment.sql`.
+- **Debito tecnico inferito**: rate limit verso `dnd5eapi` / sync wiki non quantificato nel log.
+- **Debito tecnico inferito**: backup/restore campagne lasciato a provider Postgres (non automatizzato nel repo analizzato).
+- **Debito tecnico inferito**: duplicazione storica `render.yaml` add/remove — consolidare una sola fonte di verità deploy.
 
 ---
 
-> **Nota metodologica**: questo file è stato generato retroattivamente analizzando la history del repo. Le sezioni con `> [TODO da compilare manualmente]` richiedono la memoria del developer e non possono essere inferite dalla sola analisi automatica. Integra progressivamente con annotazioni manuali mentre lavori alle prossime fasi del progetto.
+> **Nota metodologica**: completamento 2026-04-22; incrociare con `SETUP.md` per stato Render attuale.
+
+---
+
+## Metodologia compilazione automatica
+
+Completamento autonomo il **22 aprile 2026** analizzando:
+
+- **57+** commit (valore storico in prima stesura; verificare `git rev-list --count HEAD` locale)
+- **~10** file (`package.json`, `tsconfig`, `AGENTS.md`, `SETUP.md`, `render.yaml`, `src/createApp.ts`, workflow CI se presenti)
+- **0** TODO/FIXME rilevanti in `src/` dal grep workspace
+
+**Punti di minore confidenza:**
+
+- Numero commit esatto se `main` locale diverge da remoto dopo merge `6c4155a`.
+- Copertura test wiki/campaigns non quantificata da sola appendice commit.
 
 ---
