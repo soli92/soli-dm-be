@@ -4,6 +4,8 @@ Soli-DM è un'applicazione completa di supporto per giocatori e Dungeon Master d
 
 Questo repository contiene il **Backend API** costruito con **Node.js + Express + TypeScript + Supabase**.
 
+[`AGENTS.md`](./AGENTS.md) · [`AI_LOG.md`](./AI_LOG.md). Indicizzazione e re-ingest via [Soli Prof RAG + webhook `push`](https://github.com/soli92/soli-prof/blob/main/AGENTS.md); i test `npm test` (Vitest) restano indipendenti.
+
 ---
 
 ## 📋 Caratteristiche

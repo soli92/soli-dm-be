@@ -16,6 +16,12 @@ Backend **TypeScript** / **Express** per **Soli Dungeon Master**: campagne, pers
 
 ---
 
+## Aggiornamento 2026-04-27 — Soli Prof (RAG) / documentazione
+
+- [soli-prof](https://github.com/soli92/soli-prof) indica questo repo in `CORPUS_REPOS` dove applicabile. Webhook `push` verso `https://soli-prof.vercel.app/api/webhooks/github` (HMAC) per re-ingest. Allineati `AGENTS.md` e riferimenti; i test del repo **non** dipendono.
+
+---
+
 ## Fasi di sviluppo (inferite dal history)
 
 ### Fase 1 — Init TypeScript e API D&D (campagne, personaggi, dadi, wiki)

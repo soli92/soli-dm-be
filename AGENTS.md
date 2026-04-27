@@ -1,6 +1,6 @@
 # AGENTS.md — Soli Dungeon Master Backend
 
-**Aggiornato:** 2026-04-10
+**Aggiornato:** 2026-04-27
 
 ## Progetto
 
@@ -88,3 +88,6 @@ I file `*.test.ts` sono **esclusi** da `tsc` (`tsconfig.json` → `exclude`).
 - Variabili: allineare **`CORS_ORIGIN`** al dominio del frontend; stesse chiavi sensate del **`.env.example`** (senza committare segreti).
 
 Dettaglio operativo: **`SETUP.md`** § 4; riepilogo in **`README.md`** § Deployment.
+## Integrazione Soli Prof (RAG / webhook)
+
+Questo backend è in **`CORPUS_REPOS`** (file di config / workflow) su [soli-prof](https://github.com/soli92/soli-prof). Un webhook `push` può attivare re-ingest. I test in `src/*.integration.test.ts` e `npm test` **non** dipendono da quel canale. [soli-prof `AGENTS.md`](https://github.com/soli92/soli-prof/blob/main/AGENTS.md).
