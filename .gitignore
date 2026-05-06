@@ -10,3 +10,16 @@ dist/
 *.swp
 *.swo
 coverage/
+
+# LLM Wiki template
+# Obsidian
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/graph.json
+
+# OS
+Thumbs.db
+
+# Editor
+
+# Note: raw/ is intentionally NOT ignored. Sources are part of ground truth.
